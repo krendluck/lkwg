@@ -27,5 +27,22 @@
     "ESC_Retry_Wait": {
         "post_delay": 500,
         "next": "ESC_Detection"
+    },
+
+    "Focus_EnergyEntry":{
+        "recognition": "TemplateMatch",
+        "template": "Battle/Energy.png",
+        "roi": [11, 583, 102, 101],
+        "threshold": 0.7,
+        "action": "LongPress",
+        "duration": 120,
+        "post_delay": 300,
+        "timeout": 2000,
+        "next": "Focus_EnergyLoopWait",
+        "on_error": "Focus_EnergyEntry"
+    },
+    "Focus_EnergyLoopWait": {
+        "post_delay": 2000,
+        "next": "Focus_EnergyEntry"
     }
 }
