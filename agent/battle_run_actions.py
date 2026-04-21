@@ -43,7 +43,7 @@ def resolve_wait_seconds(config, randint_func=random.randint):
     raise ValueError(f"unsupported wait mode: {mode}")
 
 
-@AgentServer.custom_action("sunflower_wait")
+@AgentServer.custom_action("battle_run")
 class BattleRunAction(CustomAction):
     def run(
         self,
