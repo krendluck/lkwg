@@ -1,0 +1,31 @@
+{
+    "Battle_RunEntry": {
+        "next": "ESC_Detection"
+    },
+    "ESC_Detection": {
+        "recognition": "TemplateMatch",
+        "template": "Battle/ESC.png",
+        "roi": [920, 613, 91, 92],
+        "threshold": 0.7,
+        "action": "LongPress",
+        "duration": 120,
+        "post_delay": 300,
+        "timeout": 2000,
+        "next": "Confirm_Yes_Detection",
+        "on_error": "ESC_Retry_Wait"
+    },
+    "Confirm_Yes_Detection": {
+        "recognition": "OCR",
+        "expected": "是",
+        "roi": [701, 558, 84, 73],
+        "action": "LongPress",
+        "duration": 120,
+        "post_delay": 300,
+        "timeout": 2500,
+        "on_error": "ESC_Retry_Wait"
+    },
+    "ESC_Retry_Wait": {
+        "post_delay": 500,
+        "next": "ESC_Detection"
+    }
+}
