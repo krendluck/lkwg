@@ -47,16 +47,14 @@
         "on_error": "ESC_Retry_Wait_Click_Box"
     },
     "Confirm_Yes_Detection_Click_Box": {
-        "recognition": "OCR",
-        "expected": ["是", "确认", "确定"],
-        "roi": [701, 558, 84, 73],
+        "recognition": "DirectHit",
         "action": "Click",
-        "target": true,
+        "target": [743, 594],
         "contact": 0,
         "repeat": 2,
         "repeat_delay": 80,
         "post_delay": 300,
-        "timeout": 2500,
+        "timeout": 800,
         "on_error": "ESC_Retry_Wait_Click_Box"
     },
     "ESC_Retry_Wait_Click_Box": {
@@ -80,16 +78,14 @@
         "on_error": "ESC_Retry_Wait_Click_Point"
     },
     "Confirm_Yes_Detection_Click_Point": {
-        "recognition": "OCR",
-        "expected": ["是", "确认", "确定"],
-        "roi": [701, 558, 84, 73],
+        "recognition": "DirectHit",
         "action": "Click",
         "target": [743, 594],
         "contact": 0,
         "repeat": 2,
         "repeat_delay": 80,
         "post_delay": 300,
-        "timeout": 2500,
+        "timeout": 800,
         "on_error": "ESC_Retry_Wait_Click_Point"
     },
     "ESC_Retry_Wait_Click_Point": {
@@ -113,16 +109,14 @@
         "on_error": "ESC_Retry_Wait_Click_Rect"
     },
     "Confirm_Yes_Detection_Click_Rect": {
-        "recognition": "OCR",
-        "expected": ["是", "确认", "确定"],
-        "roi": [701, 558, 84, 73],
+        "recognition": "DirectHit",
         "action": "Click",
-        "target": [734, 585, 18, 18],
+        "target": [743, 594],
         "contact": 0,
         "repeat": 2,
         "repeat_delay": 80,
         "post_delay": 300,
-        "timeout": 2500,
+        "timeout": 800,
         "on_error": "ESC_Retry_Wait_Click_Rect"
     },
     "ESC_Retry_Wait_Click_Rect": {
@@ -150,14 +144,12 @@
         "next": "Confirm_Yes_Detection_TouchTap_Down"
     },
     "Confirm_Yes_Detection_TouchTap_Down": {
-        "recognition": "OCR",
-        "expected": ["是", "确认", "确定"],
-        "roi": [701, 558, 84, 73],
+        "recognition": "DirectHit",
         "action": "TouchDown",
         "target": [743, 594],
         "contact": 0,
         "pressure": 1,
-        "timeout": 2500,
+        "timeout": 800,
         "next": "Confirm_Yes_Detection_TouchTap_Up",
         "on_error": "ESC_Retry_Wait_TouchTap"
     },
