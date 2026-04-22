@@ -22,6 +22,54 @@
                     "mouse": "SendMessageWithCursorPos", // 鼠标控制方式
                     "keyboard": "SendMessageWithCursorPos" // 键盘控制方式
                 }
+            },
+            {
+                "name": "桌面端-SendMessage",
+                "type": "Win32",
+                "permission_required": true,
+                "win32": {
+                    "class_regex": ".*",
+                    "window_regex": "洛克王国：世界",
+                    "screencap": "PrintWindow",
+                    "mouse": "SendMessage",
+                    "keyboard": "SendMessage"
+                }
+            },
+            {
+                "name": "桌面端-PostMessage",
+                "type": "Win32",
+                "permission_required": true,
+                "win32": {
+                    "class_regex": ".*",
+                    "window_regex": "洛克王国：世界",
+                    "screencap": "PrintWindow",
+                    "mouse": "PostMessage",
+                    "keyboard": "PostMessage"
+                }
+            },
+            {
+                "name": "桌面端-WindowPos",
+                "type": "Win32",
+                "permission_required": true,
+                "win32": {
+                    "class_regex": ".*",
+                    "window_regex": "洛克王国：世界",
+                    "screencap": "PrintWindow",
+                    "mouse": "SendMessageWithWindowPos",
+                    "keyboard": "SendMessageWithWindowPos"
+                }
+            },
+            {
+                "name": "桌面端-Seize",
+                "type": "Win32",
+                "permission_required": true,
+                "win32": {
+                    "class_regex": ".*",
+                    "window_regex": "洛克王国：世界",
+                    "screencap": "PrintWindow",
+                    "mouse": "Seize",
+                    "keyboard": "Seize"
+                }
             }
         ],
         "resource": [
