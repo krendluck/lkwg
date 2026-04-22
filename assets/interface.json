@@ -18,9 +18,9 @@
                 "win32": {
                     "class_regex": ".*",
                     "window_regex": "洛克王国：世界",
-                    "screencap": "FramePool", // 截图方式
-                    "mouse": "Seize", // 鼠标控制方式
-                    "keyboard": "Seize" // 键盘控制方式
+                    "screencap": "PrintWindow", // 截图方式
+                    "mouse": "SendMessageWithCursorPos", // 鼠标控制方式
+                    "keyboard": "SendMessageWithCursorPos" // 键盘控制方式
                 }
             }
         ],
