@@ -16,9 +16,121 @@
         "next": "Auto_LaunchEntry"
     },
     "Battle_RunEntry": {
-        "next": "ESC_Detection"
+        "next": "ESC_Detection_Click_Point"
     },
-    "ESC_Detection": {
+    "Battle_RunEntry_Click_Box": {
+        "next": "ESC_Detection_Click_Box"
+    },
+    "Battle_RunEntry_Click_Point": {
+        "next": "ESC_Detection_Click_Point"
+    },
+    "Battle_RunEntry_Click_Rect": {
+        "next": "ESC_Detection_Click_Rect"
+    },
+    "Battle_RunEntry_TouchTap": {
+        "next": "ESC_Detection_TouchTap_Down"
+    },
+
+    "ESC_Detection_Click_Box": {
+        "recognition": "TemplateMatch",
+        "template": "Battle/ESC.png",
+        "roi": [920, 613, 91, 92],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": true,
+        "contact": 0,
+        "repeat": 2,
+        "repeat_delay": 80,
+        "post_delay": 300,
+        "timeout": 2000,
+        "next": "Confirm_Yes_Detection_Click_Box",
+        "on_error": "ESC_Retry_Wait_Click_Box"
+    },
+    "Confirm_Yes_Detection_Click_Box": {
+        "recognition": "OCR",
+        "expected": ["是", "确认", "确定"],
+        "roi": [701, 558, 84, 73],
+        "action": "Click",
+        "target": true,
+        "contact": 0,
+        "repeat": 2,
+        "repeat_delay": 80,
+        "post_delay": 300,
+        "timeout": 2500,
+        "on_error": "ESC_Retry_Wait_Click_Box"
+    },
+    "ESC_Retry_Wait_Click_Box": {
+        "post_delay": 500,
+        "next": "ESC_Detection_Click_Box"
+    },
+
+    "ESC_Detection_Click_Point": {
+        "recognition": "TemplateMatch",
+        "template": "Battle/ESC.png",
+        "roi": [920, 613, 91, 92],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [955, 648],
+        "contact": 0,
+        "repeat": 2,
+        "repeat_delay": 80,
+        "post_delay": 300,
+        "timeout": 2000,
+        "next": "Confirm_Yes_Detection_Click_Point",
+        "on_error": "ESC_Retry_Wait_Click_Point"
+    },
+    "Confirm_Yes_Detection_Click_Point": {
+        "recognition": "OCR",
+        "expected": ["是", "确认", "确定"],
+        "roi": [701, 558, 84, 73],
+        "action": "Click",
+        "target": [743, 594],
+        "contact": 0,
+        "repeat": 2,
+        "repeat_delay": 80,
+        "post_delay": 300,
+        "timeout": 2500,
+        "on_error": "ESC_Retry_Wait_Click_Point"
+    },
+    "ESC_Retry_Wait_Click_Point": {
+        "post_delay": 500,
+        "next": "ESC_Detection_Click_Point"
+    },
+
+    "ESC_Detection_Click_Rect": {
+        "recognition": "TemplateMatch",
+        "template": "Battle/ESC.png",
+        "roi": [920, 613, 91, 92],
+        "threshold": 0.7,
+        "action": "Click",
+        "target": [946, 639, 18, 18],
+        "contact": 0,
+        "repeat": 2,
+        "repeat_delay": 80,
+        "post_delay": 300,
+        "timeout": 2000,
+        "next": "Confirm_Yes_Detection_Click_Rect",
+        "on_error": "ESC_Retry_Wait_Click_Rect"
+    },
+    "Confirm_Yes_Detection_Click_Rect": {
+        "recognition": "OCR",
+        "expected": ["是", "确认", "确定"],
+        "roi": [701, 558, 84, 73],
+        "action": "Click",
+        "target": [734, 585, 18, 18],
+        "contact": 0,
+        "repeat": 2,
+        "repeat_delay": 80,
+        "post_delay": 300,
+        "timeout": 2500,
+        "on_error": "ESC_Retry_Wait_Click_Rect"
+    },
+    "ESC_Retry_Wait_Click_Rect": {
+        "post_delay": 500,
+        "next": "ESC_Detection_Click_Rect"
+    },
+
+    "ESC_Detection_TouchTap_Down": {
         "recognition": "TemplateMatch",
         "template": "Battle/ESC.png",
         "roi": [920, 613, 91, 92],
@@ -26,29 +138,38 @@
         "action": "TouchDown",
         "target": [955, 648],
         "contact": 0,
-        "repeat": 3,
-        "repeat_delay": 100,
-        "pressure": 3,
+        "pressure": 1,
         "timeout": 2000,
-        "next": "Confirm_Yes_Detection",
-        "on_error": "ESC_Retry_Wait"
+        "next": "ESC_Detection_TouchTap_Up",
+        "on_error": "ESC_Retry_Wait_TouchTap"
     },
-    "Confirm_Yes_Detection": {
+    "ESC_Detection_TouchTap_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
+        "next": "Confirm_Yes_Detection_TouchTap_Down"
+    },
+    "Confirm_Yes_Detection_TouchTap_Down": {
         "recognition": "OCR",
-        "expected": "是",
+        "expected": ["是", "确认", "确定"],
         "roi": [701, 558, 84, 73],
         "action": "TouchDown",
         "target": [743, 594],
         "contact": 0,
-        "repeat": 3,
-        "repeat_delay": 100,
-        "pressure": 3,
+        "pressure": 1,
         "timeout": 2500,
-        "on_error": "ESC_Retry_Wait"
+        "next": "Confirm_Yes_Detection_TouchTap_Up",
+        "on_error": "ESC_Retry_Wait_TouchTap"
     },
-    "ESC_Retry_Wait": {
+    "Confirm_Yes_Detection_TouchTap_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
+        "on_error": "ESC_Retry_Wait_TouchTap"
+    },
+    "ESC_Retry_Wait_TouchTap": {
         "post_delay": 500,
-        "next": "ESC_Detection"
+        "next": "ESC_Detection_TouchTap_Down"
     },
 
     "Focus_EnergyEntry":{

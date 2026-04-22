@@ -46,6 +46,22 @@
 
             },
             {
+                "name": "战斗脱离-点框中心",
+                "entry": "Battle_RunEntry_Click_Box"
+            },
+            {
+                "name": "战斗脱离-点固定坐标",
+                "entry": "Battle_RunEntry_Click_Point"
+            },
+            {
+                "name": "战斗脱离-点固定区域",
+                "entry": "Battle_RunEntry_Click_Rect"
+            },
+            {
+                "name": "战斗脱离-TouchDownUp",
+                "entry": "Battle_RunEntry_TouchTap"
+            },
+            {
                 "name": "自动聚能",
                 "entry": "Focus_EnergyEntry"
             },
