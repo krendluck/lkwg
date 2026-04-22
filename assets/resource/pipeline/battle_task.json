@@ -36,25 +36,35 @@
         "template": "Battle/ESC.png",
         "roi": [920, 613, 91, 92],
         "threshold": 0.7,
-        "action": "Click",
+        "action": "TouchDown",
         "target": true,
         "contact": 0,
-        "repeat": 2,
-        "repeat_delay": 80,
-        "post_delay": 300,
+        "pressure": 1,
         "timeout": 2000,
+        "next": "ESC_Detection_Click_Box_Up",
+        "on_error": "ESC_Retry_Wait_Click_Box"
+    },
+    "ESC_Detection_Click_Box_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
         "next": "Confirm_Yes_Detection_Click_Box",
         "on_error": "ESC_Retry_Wait_Click_Box"
     },
     "Confirm_Yes_Detection_Click_Box": {
         "recognition": "DirectHit",
-        "action": "Click",
+        "action": "TouchDown",
         "target": [743, 594],
         "contact": 0,
-        "repeat": 2,
-        "repeat_delay": 80,
-        "post_delay": 300,
+        "pressure": 1,
         "timeout": 800,
+        "next": "Confirm_Yes_Detection_Click_Box_Up",
+        "on_error": "ESC_Retry_Wait_Click_Box"
+    },
+    "Confirm_Yes_Detection_Click_Box_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
         "on_error": "ESC_Retry_Wait_Click_Box"
     },
     "ESC_Retry_Wait_Click_Box": {
@@ -67,25 +77,35 @@
         "template": "Battle/ESC.png",
         "roi": [920, 613, 91, 92],
         "threshold": 0.7,
-        "action": "Click",
+        "action": "TouchDown",
         "target": [955, 648],
         "contact": 0,
-        "repeat": 2,
-        "repeat_delay": 80,
-        "post_delay": 300,
+        "pressure": 1,
         "timeout": 2000,
+        "next": "ESC_Detection_Click_Point_Up",
+        "on_error": "ESC_Retry_Wait_Click_Point"
+    },
+    "ESC_Detection_Click_Point_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
         "next": "Confirm_Yes_Detection_Click_Point",
         "on_error": "ESC_Retry_Wait_Click_Point"
     },
     "Confirm_Yes_Detection_Click_Point": {
         "recognition": "DirectHit",
-        "action": "Click",
+        "action": "TouchDown",
         "target": [743, 594],
         "contact": 0,
-        "repeat": 2,
-        "repeat_delay": 80,
-        "post_delay": 300,
+        "pressure": 1,
         "timeout": 800,
+        "next": "Confirm_Yes_Detection_Click_Point_Up",
+        "on_error": "ESC_Retry_Wait_Click_Point"
+    },
+    "Confirm_Yes_Detection_Click_Point_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
         "on_error": "ESC_Retry_Wait_Click_Point"
     },
     "ESC_Retry_Wait_Click_Point": {
@@ -98,25 +118,35 @@
         "template": "Battle/ESC.png",
         "roi": [920, 613, 91, 92],
         "threshold": 0.7,
-        "action": "Click",
+        "action": "TouchDown",
         "target": [946, 639, 18, 18],
         "contact": 0,
-        "repeat": 2,
-        "repeat_delay": 80,
-        "post_delay": 300,
+        "pressure": 1,
         "timeout": 2000,
+        "next": "ESC_Detection_Click_Rect_Up",
+        "on_error": "ESC_Retry_Wait_Click_Rect"
+    },
+    "ESC_Detection_Click_Rect_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
         "next": "Confirm_Yes_Detection_Click_Rect",
         "on_error": "ESC_Retry_Wait_Click_Rect"
     },
     "Confirm_Yes_Detection_Click_Rect": {
         "recognition": "DirectHit",
-        "action": "Click",
+        "action": "TouchDown",
         "target": [743, 594],
         "contact": 0,
-        "repeat": 2,
-        "repeat_delay": 80,
-        "post_delay": 300,
+        "pressure": 1,
         "timeout": 800,
+        "next": "Confirm_Yes_Detection_Click_Rect_Up",
+        "on_error": "ESC_Retry_Wait_Click_Rect"
+    },
+    "Confirm_Yes_Detection_Click_Rect_Up": {
+        "action": "TouchUp",
+        "contact": 0,
+        "post_delay": 300,
         "on_error": "ESC_Retry_Wait_Click_Rect"
     },
     "ESC_Retry_Wait_Click_Rect": {
