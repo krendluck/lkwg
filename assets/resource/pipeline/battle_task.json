@@ -139,7 +139,7 @@
                 91,
                 92
             ],
-            "battle_threshold": 0.7
+            "battle_threshold": 0.8
         },
         "action": "Custom",
         "custom_action": "AutoReleasePetAction",

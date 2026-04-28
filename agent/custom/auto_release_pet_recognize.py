@@ -18,7 +18,7 @@ class AutoReleasePetReco(CustomRecognition):
         threshold = payload.get("threshold", 0.3)
         count = payload.get("count", 5)
         battle_roi = payload.get("battle_roi", [920, 613, 91, 92])
-        battle_threshold = payload.get("battle_threshold", 0.7)
+        battle_threshold = payload.get("battle_threshold", 0.8)
 
         battle_result = context.run_recognition(
             "TemplateMatch",
