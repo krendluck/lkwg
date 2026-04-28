@@ -3,9 +3,9 @@ import sys
 from maa.agent.agent_server import AgentServer
 from maa.toolkit import Toolkit
 
-import my_action
-import my_reco
-
+import custom
+import custom.auto_release_pet_action
+import custom.auto_release_pet_recognize
 
 def main():
     Toolkit.init_option("./")
@@ -14,7 +14,7 @@ def main():
         print("Usage: python main.py <socket_id>")
         print("socket_id is provided by AgentIdentifier.")
         sys.exit(1)
-        
+
     socket_id = sys.argv[-1]
 
     AgentServer.start_up(socket_id)

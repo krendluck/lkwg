@@ -115,7 +115,7 @@ def install_resource():
 
     with open(install_path / "interface.json", "r", encoding="utf-8") as f:
         interface = jsonc.load(f)
-
+        
     interface["version"] = version
 
     with open(install_path / "interface.json", "w", encoding="utf-8") as f:
