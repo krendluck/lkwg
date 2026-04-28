@@ -13,7 +13,7 @@ class AutoReleasePetReco(CustomRecognition):
             payload = json.loads(argv.custom_recognition_param or "{}")
         except:
             payload = {}
-
+        
         roi = payload.get("roi", [72, 123, 90, 402])
         threshold = payload.get("threshold", 0.3)
         count = payload.get("count", 5)
@@ -24,9 +24,11 @@ class AutoReleasePetReco(CustomRecognition):
             "TemplateMatch",
             argv.image,
             {
-                "template": "Battle/ESC.png",
-                "roi": battle_roi,
-                "threshold": battle_threshold
+                "TemplateMatch": {
+                    "template": "Battle/ESC.png",
+                    "roi": battle_roi,
+                    "threshold": battle_threshold
+                }
             }
         )
 
@@ -40,10 +42,12 @@ class AutoReleasePetReco(CustomRecognition):
             "TemplateMatch",
             argv.image,
             {
-                "template": "Custom/status.png",
-                "roi": roi,
-                "threshold": threshold,
-                "count": count
+                "TemplateMatch": {
+                    "template": "Custom/status.png",
+                    "roi": roi,
+                    "threshold": threshold,
+                    "count": count
+                }
             }
         )
 
@@ -66,7 +70,11 @@ class AutoReleasePetReco(CustomRecognition):
                 ocr_result = context.run_recognition(
                     "OCR",
                     argv.image,
-                    {"roi": [num_box_x, num_box_y, num_box_w, num_box_h]}
+                    {
+                        "OCR": {
+                            "roi": [num_box_x, num_box_y, num_box_w, num_box_h]
+                        }
+                    }
                 )
 
                 if ocr_result and ocr_result.detail:

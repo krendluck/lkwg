@@ -1,24 +1,6 @@
-import json
-import random
-import time
-import re
-
 from maa.agent.agent_server import AgentServer
-from maa.context import Context
 from maa.custom_action import CustomAction
-
-
-@AgentServer.custom_action("battle_run")
-class BattleRunAction(CustomAction):
-    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
-        try:
-            payload = json.loads(argv.custom_action_param or "{}")
-            seconds = payload.get("fixed_seconds", 0)
-        except:
-            seconds = 0
-        print(f"battle_run: sleep {seconds}s")
-        time.sleep(seconds)
-        return True
+from maa.context import Context
 
 
 @AgentServer.custom_action("AutoLaunchAct")
@@ -44,18 +26,8 @@ class FocusEnergyAct(CustomAction):
         return True
 
 
-@AgentServer.custom_action("BattleRunAct")
-class BattleRunAct(CustomAction):
-    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
-        print("BattleRunAct: 点击确认脱离")
-        context.controller.post_click(743, 594).wait()
-        return True
-
-
 __all__ = [
-    "BattleRunAction",
     "AutoLaunchAct",
     "LaunchCheckAct",
     "FocusEnergyAct",
-    "BattleRunAct",
 ]
