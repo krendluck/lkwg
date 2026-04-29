@@ -17,26 +17,8 @@ class AutoReleasePetReco(CustomRecognition):
         roi = payload.get("roi", [72, 123, 90, 402])
         threshold = payload.get("threshold", 0.3)
         count = payload.get("count", 5)
-        battle_roi = payload.get("battle_roi", [920, 613, 91, 92])
-        battle_threshold = payload.get("battle_threshold", 0.8)
 
-        battle_result = context.run_recognition(
-            "TemplateMatch",
-            argv.image,
-            {
-                "TemplateMatch": {
-                    "template": "Battle/ESC.png",
-                    "roi": battle_roi,
-                    "threshold": battle_threshold
-                }
-            }
-        )
-
-        if battle_result and battle_result.box:
-            return CustomRecognition.AnalyzeResult(
-                box=None,
-                detail="in_battle"
-            )
+                 
 
         template_result = context.run_recognition(
             "TemplateMatch",
