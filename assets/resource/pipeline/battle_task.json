@@ -125,26 +125,40 @@
         "recognition": "Custom",
         "custom_recognition": "AutoReleasePetReco",
         "custom_recognition_param": {
-            "roi": [
-                72,
-                123,
-                90,
-                402
+            "slots": [
+                [95, 132, 23, 18],
+                [95, 186, 23, 18],
+                [95, 240, 23, 18],
+                [95, 294, 23, 18],
+                [95, 348, 23, 18]
             ],
-            "threshold": 0.3,
-            "count": 5,
-            "battle_roi": [
-                920,
-                613,
-                91,
-                92
-            ],
-            "battle_threshold": 0.9
+            "match_threshold": 0.7,
+            "confirm_window": 10,
+            "confirm_ratio": 0.7,
+            "debug_log": true
         },
         "action": "Custom",
         "custom_action": "AutoReleasePetAction",
         "post_delay": 500,
-        "timeout": -1,
+        "next": "DoReleaseKey"
+    },
+    "DoReleaseKey": {
+        "recognition": "DirectHit",
+        "action": "ClickKey",
+        "key": 50,
+        "post_delay": 500,
+        "next": "LoopWait"
+    },
+    "LoopWait": {
+        "recognition": "DirectHit",
+        "post_delay": 500,
         "next": "AutoReleasePet_Entry"
+    },
+    "MouseLongPressEntry": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "MouseLongPress",
+        "custom_action_param": "{\"key\":\"c\"}",
+        "next": []
     }
 }

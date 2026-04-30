@@ -1,4 +1,7 @@
+import json
+import os
 import re
+import time
 
 from maa.agent.agent_server import AgentServer
 from maa.custom_action import CustomAction
@@ -7,34 +10,57 @@ from maa.context import Context
 
 @AgentServer.custom_action("AutoReleasePetAction")
 class AutoReleasePetAction(CustomAction):
+
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
-        detail = argv.reco_detail or ""
-        print(f"AutoReleasePetAction: detail={detail}")
+        raw = argv.reco_detail
 
-        if detail == "in_battle":
-            print("AutoReleasePetAction: 战斗中，等待离开")
-            return True
-
-        if detail == "not_found" or detail == "template_not_found":
-            print("AutoReleasePetAction: 未找到标志，初始化放出")
-            context.controller.post_click_key(50).wait()
-            return True
-
-        match = re.search(r'next:(\S+)', detail)
-        if not match:
-            print("AutoReleasePetAction: 未识别到有效动作")
-            return True
-
-        next_action = match.group(1)
-
-        if next_action.isdigit():
-            num = int(next_action)
-            print(f"AutoReleasePetAction: 放出宠物 {num}")
-            context.controller.post_click_key(48 + num).wait()
-        elif next_action == "switch":
-            print("AutoReleasePetAction: 切换宠物")
-            context.controller.post_click_key(50).wait()
+        if raw is None:
+            detail = ""
+        elif hasattr(raw, 'all_results') and raw.all_results:
+            detail = str(raw.all_results[0].detail).strip('"')
+        elif hasattr(raw, 'best_result') and raw.best_result:
+            detail = str(raw.best_result.detail).strip('"')
+        elif hasattr(raw, 'raw_detail') and raw.raw_detail is not None:
+            detail = str(raw.raw_detail)
         else:
-            print(f"AutoReleasePetAction: 未知动作 {next_action}")
+            detail = str(raw)
 
+        logf = None
+        def _log(msg):
+            line = f"[{time.strftime('%H:%M:%S')}] ACTION {msg}"
+            print(line)
+            if logf:
+                logf.write(line + "\n")
+                logf.flush()
+
+        os.makedirs("debug", exist_ok=True)
+        logf = open(os.path.join("debug", "release_log.txt"), "a")
+        _log(f"raw_type={type(raw).__name__} detail={detail}")
+
+        key_code = 50
+
+        if "not_found" in detail:
+            key_code = 50
+            _log(f"not_found → key={key_code}")
+        elif "in_battle" in detail:
+            _log("in_battle, skip")
+            logf.close()
+            return True
+        else:
+            match = re.search(r'next:(\S+)', detail)
+            if match:
+                next_action = match.group(1)
+                _log(f"parsed next_action={next_action}")
+                if next_action.isdigit():
+                    key_code = 48 + int(next_action)
+                elif next_action == "switch":
+                    key_code = 50
+            else:
+                _log("no next: match, using default key=50")
+
+        _log(f"override_pipeline DoReleaseKey key={key_code}")
+        context.override_pipeline({"DoReleaseKey": {"key": key_code}})
+        _log("done")
+
+        logf.close()
         return True

@@ -1,5 +1,7 @@
 import json
-import re
+import os
+import time
+from collections import deque
 
 from maa.agent.agent_server import AgentServer
 from maa.custom_recognition import CustomRecognition
@@ -8,74 +10,111 @@ from maa.context import Context
 
 @AgentServer.custom_recognition("AutoReleasePetReco")
 class AutoReleasePetReco(CustomRecognition):
+
+    _hits = {}
+
     def analyze(self, context: Context, argv: CustomRecognition.AnalyzeArg) -> CustomRecognition.AnalyzeResult:
         try:
             payload = json.loads(argv.custom_recognition_param or "{}")
         except:
             payload = {}
-        
-        roi = payload.get("roi", [72, 123, 90, 402])
-        threshold = payload.get("threshold", 0.3)
-        count = payload.get("count", 5)
 
-                 
+        debug_log = payload.get("debug_log", False)
+        slots = payload.get("slots", [
+            [49, 129, 72, 37],
+            [49, 185, 71, 33],
+            [49, 239, 69, 35],
+            [49, 294, 69, 33],
+            [49, 349, 64, 34],
+        ])
+        match_threshold = payload.get("match_threshold", 0.7)
+        confirm_window = payload.get("confirm_window", 10)
+        confirm_ratio = payload.get("confirm_ratio", 0.7)
 
-        template_result = context.run_recognition(
-            "TemplateMatch",
-            argv.image,
-            {
-                "TemplateMatch": {
-                    "template": "Custom/status.png",
-                    "roi": roi,
-                    "threshold": threshold,
-                    "count": count
-                }
-            }
-        )
+        if isinstance(match_threshold, int) and match_threshold > 1:
+            match_threshold = match_threshold / 10.0
+        if isinstance(confirm_ratio, int) and confirm_ratio > 1:
+            confirm_ratio = confirm_ratio / 10.0
 
-        if not template_result or not template_result.box:
-            return CustomRecognition.AnalyzeResult(box=None, detail="not_found")
+        logf = None
+        def _log(msg):
+            line = f"[{time.strftime('%H:%M:%S')}] {msg}"
+            print(line)
+            if logf:
+                logf.write(line + "\n")
+                logf.flush()
 
-        released_nums = set()
+        if debug_log:
+            os.makedirs("debug", exist_ok=True)
+            logf = open(os.path.join("debug", "release_log.txt"), "a")
+            _log("=== start ===")
 
-        for box in template_result.box:
-            if len(box) >= 4:
-                bx, by, bw, bh = box[0], box[1], box[2], box[3]
-                center_x = bx + bw // 2
-                center_y = by + bh // 2
+        for i, slot in enumerate(slots):
+            pet_num = i + 2
+            entry = f"pet{pet_num}_check"
 
-                num_box_x = center_x - 64
-                num_box_y = center_y + 8
-                num_box_w = 24
-                num_box_h = 25
-
-                ocr_result = context.run_recognition(
-                    "OCR",
+            try:
+                match_result = context.run_recognition(
+                    entry,
                     argv.image,
                     {
-                        "OCR": {
-                            "roi": [num_box_x, num_box_y, num_box_w, num_box_h]
+                        entry: {
+                            "recognition": "TemplateMatch",
+                            "template": "Custom/status.png",
+                            "roi": slot,
+                            "threshold": match_threshold,
                         }
-                    }
+                    },
                 )
+            except Exception as e:
+                _log(f"pet_{pet_num} EXCEPTION: {e}")
+                continue
 
-                if ocr_result and ocr_result.detail:
-                    text = str(ocr_result.detail)
-                    digits = re.sub(r'\D', '', text)
-                    if digits:
-                        num = int(digits[0])
-                        released_nums.add(num)
+            hit = False
+            if match_result:
+                box = getattr(match_result, "box", None)
+                if box is not None:
+                    if hasattr(box, "w"):
+                        bw, bh = box.w, box.h
+                    else:
+                        bw, bh = box[2], box[3]
+                    if bw > 0 and bh > 0:
+                        hit = True
 
-        unreleased = [n for n in range(2, 7) if n not in released_nums]
+            if pet_num not in self._hits:
+                self._hits[pet_num] = deque(maxlen=confirm_window)
+            self._hits[pet_num].append(1 if hit else 0)
 
-        if unreleased:
-            next_num = min(unreleased)
-            detail = f"released:{list(released_nums)},next:{next_num}"
+            window = self._hits[pet_num]
+            window_sum = sum(window)
+            window_len = len(window)
+            ratio = window_sum / window_len if window_len > 0 else 0.0
+            confirmed = window_len >= confirm_window and ratio >= confirm_ratio
+
+            status = "confirmed" if confirmed else ("pending+" if hit else "pending-")
+            _log(f"pet_{pet_num} hit={hit} window={window_sum}/{window_len}({ratio:.2f}) [{status}]")
+
+        released_nums = {n for n in range(2, 7)
+                         if n in self._hits
+                         and len(self._hits[n]) >= confirm_window
+                         and sum(self._hits[n]) / len(self._hits[n]) >= confirm_ratio}
+
+        if released_nums:
+            unreleased = [n for n in range(2, 7) if n not in released_nums]
+            if unreleased:
+                next_num = min(unreleased)
+                detail = f"released:{list(sorted(released_nums))},next:{next_num}"
+            else:
+                detail = f"released:{list(sorted(released_nums))},next:switch"
         else:
-            detail = f"released:{list(released_nums)},next:switch"
+            detail = "not_found"
 
-        bx, by, bw, bh = template_result.box[0][0], template_result.box[0][1], template_result.box[0][2], template_result.box[0][3]
+        _log(f"=> {detail}")
+
+        if logf:
+            logf.close()
+
         return CustomRecognition.AnalyzeResult(
-            box=(bx, by, bw, bh),
-            detail=detail
+            box=(0, 0, 0, 0),
+            detail=detail,
         )

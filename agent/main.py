@@ -6,6 +6,7 @@ from maa.toolkit import Toolkit
 import custom
 import custom.auto_release_pet_action
 import custom.auto_release_pet_recognize
+import custom.mouse_long_press_action
 
 def main():
     Toolkit.init_option("./")

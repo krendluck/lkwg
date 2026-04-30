@@ -55,7 +55,17 @@
         },
         {
             "name": "自动放宠",
-            "entry": "AutoReleasePet_Entry"
+            "entry": "AutoReleasePet_Entry",
+            "option": [
+                "放宠设置"
+            ]
+        },
+        {
+            "name": "鼠标长按",
+            "entry": "MouseLongPressEntry",
+            "option": [
+                "映射按键"
+            ]
         }
     ],
     "option": {
@@ -136,6 +146,60 @@
                     }
                 }
             ]
+        },
+        "放宠设置": {
+            "type": "input",
+            "label": "放宠参数",
+            "inputs": [
+                {
+                    "name": "threshold",
+                    "label": "匹配阈值(0-10)",
+                    "default": "7",
+                    "pipeline_type": "int",
+                    "verify": "^\\d+$",
+                    "pattern_msg": "请输入0-10的整数"
+                },
+                {
+                    "name": "window",
+                    "label": "确认窗口(帧数)",
+                    "default": "10",
+                    "pipeline_type": "int",
+                    "verify": "^\\d+$",
+                    "pattern_msg": "请输入正整数"
+                },
+                {
+                    "name": "ratio",
+                    "label": "确认比例(0-10)",
+                    "default": "7",
+                    "pipeline_type": "int",
+                    "verify": "^\\d+$",
+                    "pattern_msg": "请输入0-10的整数"
+                }
+            ],
+            "pipeline_override": {
+                "AutoReleasePet_Entry": {
+                    "custom_recognition_param": "{\"slots\":[[49,129,69,37],[49,185,69,33],[49,239,69,35],[49,294,69,33],[49,349,69,34]],\"match_threshold\":「threshold」,\"confirm_window\":「window」,\"confirm_ratio\":「ratio」,\"debug_log\":true}"
+                }
+            }
+        },
+        "映射按键": {
+            "type": "input",
+            "label": "鼠标长按设置",
+            "inputs": [
+                {
+                    "name": "key",
+                    "label": "映射按键(字母/数字/空格)",
+                    "default": "c",
+                    "pipeline_type": "string",
+                    "verify": "^[0-9a-zA-Z ]$",
+                    "pattern_msg": "请输入一个按键(字母、数字或空格)"
+                }
+            ],
+            "pipeline_override": {
+                "MouseLongPressEntry": {
+                    "custom_action_param": "{\"key\":\"「key」\"}"
+                }
+            }
         }
-    }
+    }    
 }
