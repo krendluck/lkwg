@@ -133,7 +133,7 @@
                 [95, 348, 23, 18]
             ],
             "match_threshold": 0.7,
-            "confirm_window": 10,
+            "confirm_window": 5,
             "confirm_ratio": 0.7,
             "debug_log": true
         },

@@ -54,32 +54,22 @@ class AutoReleasePetReco(CustomRecognition):
             entry = f"pet{pet_num}_check"
 
             try:
-                match_result = context.run_recognition(
-                    entry,
-                    argv.image,
-                    {
-                        entry: {
-                            "recognition": "TemplateMatch",
-                            "template": "Custom/status.png",
-                            "roi": slot,
-                            "threshold": match_threshold,
-                        }
-                    },
-                )
+                context.override_pipeline({
+                    entry: {
+                        "recognition": "TemplateMatch",
+                        "template": "Custom/status.png",
+                        "roi": slot,
+                        "threshold": match_threshold,
+                    }
+                })
+                match_result = context.run_recognition(entry, argv.image)
             except Exception as e:
                 _log(f"pet_{pet_num} EXCEPTION: {e}")
                 continue
 
             hit = False
-            if match_result:
-                box = getattr(match_result, "box", None)
-                if box is not None:
-                    if hasattr(box, "w"):
-                        bw, bh = box.w, box.h
-                    else:
-                        bw, bh = box[2], box[3]
-                    if bw > 0 and bh > 0:
-                        hit = True
+            if match_result is not None and match_result.hit:
+                hit = True
 
             if pet_num not in self._hits:
                 self._hits[pet_num] = deque(maxlen=confirm_window)
@@ -115,6 +105,6 @@ class AutoReleasePetReco(CustomRecognition):
             logf.close()
 
         return CustomRecognition.AnalyzeResult(
-            box=(0, 0, 0, 0),
-            detail=detail,
+            box=[0, 0, 1, 1],
+            detail={"text": detail},
         )

@@ -16,10 +16,25 @@ class AutoReleasePetAction(CustomAction):
 
         if raw is None:
             detail = ""
+        elif hasattr(raw, 'raw_detail') and isinstance(raw.raw_detail, dict):
+            detail = raw.raw_detail.get("text", "")
         elif hasattr(raw, 'all_results') and raw.all_results:
-            detail = str(raw.all_results[0].detail).strip('"')
+            r0 = raw.all_results[0]
+            d = r0.detail if hasattr(r0, 'detail') else None
+            if isinstance(d, dict):
+                detail = d.get("text", "")
+            elif d is not None:
+                detail = str(d).strip('"')
+            else:
+                detail = ""
         elif hasattr(raw, 'best_result') and raw.best_result:
-            detail = str(raw.best_result.detail).strip('"')
+            d = raw.best_result.detail if hasattr(raw.best_result, 'detail') else None
+            if isinstance(d, dict):
+                detail = d.get("text", "")
+            elif d is not None:
+                detail = str(d).strip('"')
+            else:
+                detail = ""
         elif hasattr(raw, 'raw_detail') and raw.raw_detail is not None:
             detail = str(raw.raw_detail)
         else:
