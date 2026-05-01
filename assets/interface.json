@@ -155,7 +155,7 @@
                     "name": "threshold",
                     "label": "匹配阈值(0.0-1.0)",
                     "default": "0.7",
-                    "pipeline_type": "float",
+                    "pipeline_type": "int",
                     "verify": "^0?\\.?\\d+$",
                     "pattern_msg": "请输入0-1之间的数字"
                 }
