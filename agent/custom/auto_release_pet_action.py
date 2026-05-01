@@ -1,6 +1,6 @@
+import re
 import json
 import os
-import re
 import time
 
 from maa.agent.agent_server import AgentServer
@@ -14,68 +14,42 @@ class AutoReleasePetAction(CustomAction):
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
         raw = argv.reco_detail
 
-        if raw is None:
-            detail = ""
-        elif hasattr(raw, 'raw_detail') and isinstance(raw.raw_detail, dict):
-            detail = raw.raw_detail.get("text", "")
-        elif hasattr(raw, 'all_results') and raw.all_results:
-            r0 = raw.all_results[0]
-            d = r0.detail if hasattr(r0, 'detail') else None
-            if isinstance(d, dict):
-                detail = d.get("text", "")
-            elif d is not None:
-                detail = str(d).strip('"')
+        detail = ""
+        if raw is not None:
+            if hasattr(raw, 'raw_detail') and isinstance(raw.raw_detail, dict):
+                detail = raw.raw_detail.get("text", "")
+            elif hasattr(raw, 'best_result') and raw.best_result:
+                d = getattr(raw.best_result, 'detail', None)
+                detail = d.get("text", "") if isinstance(d, dict) else str(d).strip('"') if d else ""
+            elif hasattr(raw, 'all_results') and raw.all_results:
+                d = getattr(raw.all_results[0], 'detail', None)
+                detail = d.get("text", "") if isinstance(d, dict) else str(d).strip('"') if d else ""
+            elif hasattr(raw, 'raw_detail') and raw.raw_detail is not None:
+                detail = str(raw.raw_detail)
             else:
-                detail = ""
-        elif hasattr(raw, 'best_result') and raw.best_result:
-            d = raw.best_result.detail if hasattr(raw.best_result, 'detail') else None
-            if isinstance(d, dict):
-                detail = d.get("text", "")
-            elif d is not None:
-                detail = str(d).strip('"')
-            else:
-                detail = ""
-        elif hasattr(raw, 'raw_detail') and raw.raw_detail is not None:
-            detail = str(raw.raw_detail)
-        else:
-            detail = str(raw)
+                detail = str(raw)
 
-        logf = None
-        def _log(msg):
-            line = f"[{time.strftime('%H:%M:%S')}] ACTION {msg}"
-            print(line)
-            if logf:
-                logf.write(line + "\n")
-                logf.flush()
+        try:
+            param = json.loads(argv.custom_action_param or "{}")
+        except Exception:
+            param = {}
+        debug_log = param.get("debug_log", False)
 
-        os.makedirs("debug", exist_ok=True)
-        logf = open(os.path.join("debug", "release_log.txt"), "a")
-        _log(f"raw_type={type(raw).__name__} detail={detail}")
+        if debug_log:
+            os.makedirs("debug", exist_ok=True)
+            with open(os.path.join("debug", "release_log.txt"), "a") as logf:
+                logf.write(f"[{time.strftime('%H:%M:%S')}] ACTION detail={detail}\n")
 
         key_code = 50
 
-        if "not_found" in detail:
-            key_code = 50
-            _log(f"not_found → key={key_code}")
-        elif "in_battle" in detail:
-            _log("in_battle, skip")
-            logf.close()
-            return True
-        else:
+        if "not_found" not in detail:
             match = re.search(r'next:(\S+)', detail)
             if match:
                 next_action = match.group(1)
-                _log(f"parsed next_action={next_action}")
                 if next_action.isdigit():
                     key_code = 48 + int(next_action)
                 elif next_action == "switch":
                     key_code = 50
-            else:
-                _log("no next: match, using default key=50")
 
-        _log(f"override_pipeline DoReleaseKey key={key_code}")
         context.override_pipeline({"DoReleaseKey": {"key": key_code}})
-        _log("done")
-
-        logf.close()
         return True

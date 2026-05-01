@@ -1,7 +1,6 @@
 import json
 import os
 import time
-from collections import deque
 
 from maa.agent.agent_server import AgentServer
 from maa.custom_recognition import CustomRecognition
@@ -11,8 +10,6 @@ from maa.context import Context
 @AgentServer.custom_recognition("AutoReleasePetReco")
 class AutoReleasePetReco(CustomRecognition):
 
-    _hits = {}
-
     def analyze(self, context: Context, argv: CustomRecognition.AnalyzeArg) -> CustomRecognition.AnalyzeResult:
         try:
             payload = json.loads(argv.custom_recognition_param or "{}")
@@ -21,20 +18,13 @@ class AutoReleasePetReco(CustomRecognition):
 
         debug_log = payload.get("debug_log", False)
         slots = payload.get("slots", [
-            [49, 129, 72, 37],
-            [49, 185, 71, 33],
-            [49, 239, 69, 35],
-            [49, 294, 69, 33],
-            [49, 349, 64, 34],
+            [95, 132, 23, 18],
+            [95, 186, 23, 18],
+            [95, 240, 23, 18],
+            [95, 294, 23, 18],
+            [95, 348, 23, 18],
         ])
         match_threshold = payload.get("match_threshold", 0.7)
-        confirm_window = payload.get("confirm_window", 10)
-        confirm_ratio = payload.get("confirm_ratio", 0.7)
-
-        if isinstance(match_threshold, int) and match_threshold > 1:
-            match_threshold = match_threshold / 10.0
-        if isinstance(confirm_ratio, int) and confirm_ratio > 1:
-            confirm_ratio = confirm_ratio / 10.0
 
         logf = None
         def _log(msg):
@@ -48,6 +38,8 @@ class AutoReleasePetReco(CustomRecognition):
             os.makedirs("debug", exist_ok=True)
             logf = open(os.path.join("debug", "release_log.txt"), "a")
             _log("=== start ===")
+
+        released_nums = set()
 
         for i, slot in enumerate(slots):
             pet_num = i + 2
@@ -67,27 +59,11 @@ class AutoReleasePetReco(CustomRecognition):
                 _log(f"pet_{pet_num} EXCEPTION: {e}")
                 continue
 
-            hit = False
-            if match_result is not None and match_result.hit:
-                hit = True
+            hit = match_result is not None and match_result.hit
+            _log(f"pet_{pet_num} hit={hit}")
 
-            if pet_num not in self._hits:
-                self._hits[pet_num] = deque(maxlen=confirm_window)
-            self._hits[pet_num].append(1 if hit else 0)
-
-            window = self._hits[pet_num]
-            window_sum = sum(window)
-            window_len = len(window)
-            ratio = window_sum / window_len if window_len > 0 else 0.0
-            confirmed = window_len >= confirm_window and ratio >= confirm_ratio
-
-            status = "confirmed" if confirmed else ("pending+" if hit else "pending-")
-            _log(f"pet_{pet_num} hit={hit} window={window_sum}/{window_len}({ratio:.2f}) [{status}]")
-
-        released_nums = {n for n in range(2, 7)
-                         if n in self._hits
-                         and len(self._hits[n]) >= confirm_window
-                         and sum(self._hits[n]) / len(self._hits[n]) >= confirm_ratio}
+            if hit:
+                released_nums.add(pet_num)
 
         if released_nums:
             unreleased = [n for n in range(2, 7) if n not in released_nums]
