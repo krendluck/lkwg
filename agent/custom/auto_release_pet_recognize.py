@@ -84,8 +84,6 @@ class AutoReleasePetReco(CustomRecognition):
         if logf:
             logf.close()
 
-        context.override_next(argv.node_name, [detail] if detail != "not_found" else [])
-
         return CustomRecognition.AnalyzeResult(
             box=(0, 0, 1, 1),
             detail={"text": detail},
