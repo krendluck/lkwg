@@ -16,18 +16,12 @@ class AutoReleasePetAction(CustomAction):
 
         detail = ""
         if raw is not None:
-            if hasattr(raw, 'raw_detail') and isinstance(raw.raw_detail, dict):
+            if isinstance(raw.raw_detail, dict):
                 detail = raw.raw_detail.get("text", "")
-            elif hasattr(raw, 'best_result') and raw.best_result:
-                d = getattr(raw.best_result, 'detail', None)
-                detail = d.get("text", "") if isinstance(d, dict) else str(d).strip('"') if d else ""
-            elif hasattr(raw, 'all_results') and raw.all_results:
-                d = getattr(raw.all_results[0], 'detail', None)
-                detail = d.get("text", "") if isinstance(d, dict) else str(d).strip('"') if d else ""
-            elif hasattr(raw, 'raw_detail') and raw.raw_detail is not None:
-                detail = str(raw.raw_detail)
+            elif isinstance(raw.raw_detail, str):
+                detail = raw.raw_detail
             else:
-                detail = str(raw)
+                detail = str(raw.raw_detail)
 
         try:
             param = json.loads(argv.custom_action_param or "{}")

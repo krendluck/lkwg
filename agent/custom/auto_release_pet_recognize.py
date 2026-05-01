@@ -13,7 +13,7 @@ class AutoReleasePetReco(CustomRecognition):
     def analyze(self, context: Context, argv: CustomRecognition.AnalyzeArg) -> CustomRecognition.AnalyzeResult:
         try:
             payload = json.loads(argv.custom_recognition_param or "{}")
-        except:
+        except Exception:
             payload = {}
 
         debug_log = payload.get("debug_log", False)
@@ -27,6 +27,7 @@ class AutoReleasePetReco(CustomRecognition):
         match_threshold = payload.get("match_threshold", 0.7)
 
         logf = None
+
         def _log(msg):
             line = f"[{time.strftime('%H:%M:%S')}] {msg}"
             print(line)
@@ -46,20 +47,23 @@ class AutoReleasePetReco(CustomRecognition):
             entry = f"pet{pet_num}_check"
 
             try:
-                context.override_pipeline({
-                    entry: {
-                        "recognition": "TemplateMatch",
-                        "template": "Custom/status.png",
-                        "roi": slot,
-                        "threshold": match_threshold,
-                    }
-                })
-                match_result = context.run_recognition(entry, argv.image)
+                reco_detail = context.run_recognition(
+                    entry,
+                    argv.image,
+                    pipeline_override={
+                        entry: {
+                            "recognition": "TemplateMatch",
+                            "template": "Custom/status.png",
+                            "roi": slot,
+                            "threshold": match_threshold,
+                        }
+                    },
+                )
             except Exception as e:
                 _log(f"pet_{pet_num} EXCEPTION: {e}")
                 continue
 
-            hit = match_result is not None and match_result.hit
+            hit = reco_detail is not None and reco_detail.hit
             _log(f"pet_{pet_num} hit={hit}")
 
             if hit:
@@ -80,7 +84,9 @@ class AutoReleasePetReco(CustomRecognition):
         if logf:
             logf.close()
 
+        context.override_next(argv.node_name, [detail] if detail != "not_found" else [])
+
         return CustomRecognition.AnalyzeResult(
-            box=[0, 0, 1, 1],
+            box=(0, 0, 1, 1),
             detail={"text": detail},
         )
