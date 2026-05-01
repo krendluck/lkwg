@@ -31,7 +31,6 @@ class AutoReleasePetAction(CustomAction):
 
         def _log(msg):
             line = f"[{time.strftime('%H:%M:%S')}] {msg}"
-            print(line)
             if logf:
                 logf.write(line + "\n")
                 logf.flush()
