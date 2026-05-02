@@ -9,6 +9,8 @@ from maa.agent.agent_server import AgentServer
 from maa.custom_action import CustomAction
 from maa.context import Context
 
+import json
+
 
 @AgentServer.custom_action("AutoLaunchAct")
 class AutoLaunchAct(CustomAction):
@@ -40,8 +42,15 @@ class AutoReleasePetAct(CustomAction):
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
         reco_detail = argv.reco_detail
         detail = {}
-        if reco_detail is not None and isinstance(reco_detail.raw_detail, dict):
-            detail = reco_detail.raw_detail
+        if reco_detail is not None:
+            raw = reco_detail.raw_detail
+            if isinstance(raw, dict):
+                detail = raw
+            elif isinstance(raw, str):
+                try:
+                    detail = json.loads(raw)
+                except Exception:
+                    pass
 
         key_code = detail.get("key_code", 50)
         next_num = detail.get("next_num")

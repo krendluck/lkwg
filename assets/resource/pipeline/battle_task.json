@@ -81,7 +81,7 @@
     "AutoReleasePet_Entry": {
         "recognition": "Custom",
         "custom_recognition": "AutoReleasePet_recognition",
-        "custom_recognition_param": "{\"slots\":[[95,132,23,18],[95,186,23,18],[95,240,23,18],[95,294,23,18],[95,348,23,18]],\"threshold\":0.7}",
+        "custom_recognition_param": "{\"template\":\"Custom/status.png\",\"slots\":[[95,132,23,18],[95,186,23,18],[95,240,23,18],[95,294,23,18],[95,348,23,18]],\"threshold\":0.7}",
         "action": "Custom",
         "custom_action": "AutoReleasePetAct",
         "post_delay": 500,

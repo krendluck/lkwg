@@ -81,22 +81,18 @@ class MyRecongition(CustomRecognition):
 
         # 判断是否匹配成功
         if reco_detail is not None and reco_detail.hit:
-            # 匹配成功：返回匹配到的区域和详情
-            # box 用 reco_detail.box 即模板在截图中的实际位置
-            # detail 中可以传入自定义信息，供后续 CustomAction 使用
             score = 0.0
             if reco_detail.best_result and isinstance(reco_detail.best_result.detail, dict):
                 score = reco_detail.best_result.detail.get("score", 0.0)
 
             return CustomRecognition.AnalyzeResult(
                 box=reco_detail.box,
-                detail={"hit": True, "score": score, "roi" : roi},
+                detail=json.dumps({"hit": True, "score": score, "roi": roi}),
             )
         else:
-            # 匹配失败：box 传 None，detail 标记未命中
             return CustomRecognition.AnalyzeResult(
                 box=None,
-                detail={"hit": False},
+                detail=json.dumps({"hit": False}),
             )
 
 @AgentServer.custom_recognition("AutoReleasePet_recognition")
@@ -117,7 +113,7 @@ class MyRecongition(CustomRecognition):
         if "threshold" not in param:
             raise ValueError("threshold 参数缺失，请在 custom_recognition_param 中指定匹配阈值，例如 \"threshold\": 0.7")
         if "slots" not in param:
-            raise ValueError("roi 参数缺失，请在 custom_recognition_param 中指定识别区域，例如 \"slots\": [[544, 496, 192, 85]]")
+            raise ValueError("slots 参数缺失，请在 custom_recognition_param 中指定识别区域，例如 \"slots\": [[544, 496, 192, 85]]")
         template = param["template"]
         threshold = param["threshold"]
         slots = param["slots"]
@@ -165,7 +161,11 @@ class MyRecongition(CustomRecognition):
             next_num = None
             key_code = 50  # 数字键2
 
+        # detail 必须是字符串类型，Agent IPC 模式下 dict 类型会丢失
+        # 用 JSON 字符串传递多个值，Action 端用 json.loads 解析
+        detail_str = json.dumps({"next_num": next_num, "key_code": key_code})
+
         return CustomRecognition.AnalyzeResult(
                 box=(0, 0, 1, 1),
-                detail={"next_num": next_num, "key_code": key_code},
+                detail=detail_str,
             )
