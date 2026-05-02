@@ -15,7 +15,7 @@ from maa.toolkit import Toolkit
 
 # 导入自定义模块，注册所有 CustomAction 和 CustomRecognition
 import custom
-import custom.auto_release_pet
+import custom.actions
 import custom.mouse_long_press_action
 
 def main():

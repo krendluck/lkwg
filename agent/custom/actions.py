@@ -41,26 +41,33 @@ class AutoReleasePetAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
         reco_detail = argv.reco_detail
-        detail = {}
-        if reco_detail is not None:
-            raw = reco_detail.raw_detail
-            if isinstance(raw, dict):
-                detail = raw
-            elif isinstance(raw, str):
-                try:
-                    detail = json.loads(raw)
-                except Exception:
-                    pass
+        if reco_detail is None or not reco_detail.hit:
+            return False
 
-        key_code = detail.get("key_code", 50)
+        detail = _parse_detail(reco_detail)
         next_num = detail.get("next_num")
-        if next_num is not None:
-            context.controller.post_click_key(key_code).wait()
-            return True
-        return False
+        key_code = detail.get("key_code")
+        if next_num is None:
+            return False
+
+        context.controller.post_click_key(key_code).wait()
+        return True
 
 __all__ = [
     "AutoLaunchAct",
     "FocusEnergyAct",
     "AutoReleasePetAct",
 ]
+
+def _parse_detail(reco_detail) -> dict:
+    detail = {}
+    if reco_detail is not None:
+        raw = reco_detail.raw_detail
+        if isinstance(raw, dict):
+            detail = raw
+        elif isinstance(raw, str):
+            try:
+                detail = json.loads(raw)
+            except Exception:
+                pass
+    return detail
