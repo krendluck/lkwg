@@ -79,17 +79,30 @@ __all__ = [
 
 def _parse_detail(reco_detail) -> dict:
     detail = {}
-    if reco_detail is not None:
-        raw = reco_detail.raw_detail
-        _log(f"Act _parse_detail: raw_detail type={type(raw).__name__} raw={raw}")
-        if isinstance(raw, dict):
-            detail = raw
-        elif isinstance(raw, str):
+    if reco_detail is None:
+        return detail
+
+    raw = reco_detail.raw_detail
+    _log(f"Act _parse_detail: raw_detail type={type(raw).__name__}")
+
+    if isinstance(raw, dict):
+        # 框架已经把结果解析成了字典，从 best.detail 里提取我们塞进去的 JSON 字符串
+        best = raw.get("best", {})
+        inner_detail = best.get("detail", "")
+        if isinstance(inner_detail, str) and inner_detail:
             try:
-                detail = json.loads(raw)
-                _log(f"Act _parse_detail: json.loads 成功 -> {detail}")
+                detail = json.loads(inner_detail)
+                _log(f"Act _parse_detail: 从 best.detail 解析成功 -> {detail}")
             except Exception as e:
-                _log(f"Act _parse_detail: json.loads 失败 -> {e}")
-                pass
+                _log(f"Act _parse_detail: 从 best.detail 解析失败 -> {e}")
+        else:
+            _log("Act _parse_detail: raw 是字典但未找到有效的 best.detail")
+    elif isinstance(raw, str):
+        try:
+            detail = json.loads(raw)
+            _log(f"Act _parse_detail: 从字符串解析成功 -> {detail}")
+        except Exception as e:
+            _log(f"Act _parse_detail: 从字符串解析失败 -> {e}")
+
     _log(f"Act _parse_detail: 最终 detail={detail}")
     return detail
