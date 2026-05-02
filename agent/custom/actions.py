@@ -34,8 +34,8 @@ class FocusEnergyAct(CustomAction):
         context.controller.post_click(62, 633).wait()
         return True
 
-@AgentServer.custom_action("AutoReleasePetAction")
-class AutoReleasePetAction(CustomAction):
+@AgentServer.custom_action("AutoReleasePetAct")
+class AutoReleasePetAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
         reco_detail = argv.reco_detail
@@ -53,5 +53,5 @@ class AutoReleasePetAction(CustomAction):
 __all__ = [
     "AutoLaunchAct",
     "FocusEnergyAct",
-    "AutoReleasePetAction",
+    "AutoReleasePetAct",
 ]
