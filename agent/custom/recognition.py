@@ -82,15 +82,15 @@ class AutoReleasePetRecognition(CustomRecognition):
             entry = f"pet{pet_num}_check"
 
             try:
-                context.override_pipeline({
-                    entry: {
+                match_result = context.run_recognition(
+                    entry, argv.image,
+                    pipeline_override={entry: {
                         "recognition": "TemplateMatch",
                         "template": template,
                         "roi": slot,
                         "threshold": threshold,
-                    }
-                })
-                match_result = context.run_recognition(entry, argv.image)
+                    }},
+                )
             except Exception:
                 continue
 
