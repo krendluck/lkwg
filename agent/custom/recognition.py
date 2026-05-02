@@ -166,5 +166,6 @@ class MyRecongition(CustomRecognition):
             key_code = 50  # 数字键2
 
         return CustomRecognition.AnalyzeResult(
+                box=(0, 0, 1, 1),
                 detail={"next_num": next_num, "key_code": key_code},
             )

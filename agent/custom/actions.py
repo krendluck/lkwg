@@ -14,10 +14,14 @@ from maa.context import Context
 class AutoLaunchAct(CustomAction):
     """自动登录 - 点击登录按钮坐标 (640, 538)"""
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
-        recognition_detai = argv.reco_detail
-        if recognition_detai.hit:
-            context.controller.post_click(recognition_detai.box).wait()
-            return True
+        reco_detail = argv.reco_detail
+        if reco_detail is not None and reco_detail.hit:
+            box = reco_detail.box
+            if box:
+                x = box[0] + box[2] // 2
+                y = box[1] + box[3] // 2
+                context.controller.post_click(x, y).wait()
+                return True
         return False 
         
 
@@ -30,18 +34,24 @@ class FocusEnergyAct(CustomAction):
         context.controller.post_click(62, 633).wait()
         return True
 
-@AgentServer.custom_action("AutoReleasePetAct")
+@AgentServer.custom_action("AutoReleasePetAction")
 class AutoReleasePetAction(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
-        recognition_detai = argv.reco_detail
-        if recognition_detai.next_num:
-            context.controller.post_click_key(recognition_detai.key_code).wait()
+        reco_detail = argv.reco_detail
+        detail = {}
+        if reco_detail is not None and isinstance(reco_detail.raw_detail, dict):
+            detail = reco_detail.raw_detail
+
+        key_code = detail.get("key_code", 50)
+        next_num = detail.get("next_num")
+        if next_num is not None:
+            context.controller.post_click_key(key_code).wait()
             return True
         return False
 
 __all__ = [
     "AutoLaunchAct",
     "FocusEnergyAct",
-    "AutoReleasePetAct"
+    "AutoReleasePetAction",
 ]
