@@ -32,8 +32,7 @@ class AutoLaunchAct(CustomAction):
                 y = box[1] + box[3] // 2
                 context.controller.post_click(x, y).wait()
                 return True
-        return False 
-        
+        return False
 
 
 @AgentServer.custom_action("FocusEnergyAct")
@@ -44,24 +43,48 @@ class FocusEnergyAct(CustomAction):
         context.controller.post_click(62, 633).wait()
         return True
 
+
 @AgentServer.custom_action("AutoReleasePetAct")
 class AutoReleasePetAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
         reco_detail = argv.reco_detail
         _log(f"Act run 开始 reco_detail={reco_detail}")
+
         if reco_detail is None:
             _log("Act 返回: reco_detail is None")
             return False
+
         _log(f"Act reco_detail.hit={reco_detail.hit} box={reco_detail.box} raw_detail={reco_detail.raw_detail}")
+
         if not reco_detail.hit:
             _log("Act 返回: reco_detail.hit 为 False")
             return False
 
-        detail = _parse_detail(reco_detail)
-        next_num = detail.get("next_num")
-        key_code = detail.get("key_code")
-        _log(f"Act 解析 detail: next_num={next_num} key_code={key_code}")
+        # ====== 新解析逻辑：从 best_result.detail 取逗号分隔的字符串 ======
+        raw = reco_detail.raw_detail
+        _log(f"Act raw_detail type={type(raw).__name__} raw={raw}")
+
+        detail_str = ""
+        if isinstance(raw, dict):
+            best = raw.get("best", {})
+            detail_str = best.get("detail", "")
+            _log(f"Act 从 best.detail 取出: '{detail_str}'")
+
+        next_num = None
+        key_code = None
+
+        if detail_str and "," in detail_str:
+            parts = detail_str.split(",")
+            try:
+                next_num = int(parts[0]) if parts[0] != "None" else None
+                key_code = int(parts[1]) if parts[1] != "None" else None
+                _log(f"Act 解析成功: next_num={next_num} key_code={key_code}")
+            except Exception as e:
+                _log(f"Act 解析失败: {e}")
+        else:
+            _log(f"Act detail_str 为空或格式错误: '{detail_str}'")
+
         if next_num is None:
             _log("Act 返回: next_num is None")
             return False
@@ -71,38 +94,9 @@ class AutoReleasePetAct(CustomAction):
         _log("Act 返回: True")
         return True
 
+
 __all__ = [
     "AutoLaunchAct",
     "FocusEnergyAct",
     "AutoReleasePetAct",
 ]
-
-def _parse_detail(reco_detail) -> dict:
-    detail = {}
-    if reco_detail is None:
-        return detail
-
-    raw = reco_detail.raw_detail
-    _log(f"Act _parse_detail: raw_detail type={type(raw).__name__}")
-
-    if isinstance(raw, dict):
-        # 框架已经把结果解析成了字典，从 best.detail 里提取我们塞进去的 JSON 字符串
-        best = raw.get("best", {})
-        inner_detail = best.get("detail", "")
-        if isinstance(inner_detail, str) and inner_detail:
-            try:
-                detail = json.loads(inner_detail)
-                _log(f"Act _parse_detail: 从 best.detail 解析成功 -> {detail}")
-            except Exception as e:
-                _log(f"Act _parse_detail: 从 best.detail 解析失败 -> {e}")
-        else:
-            _log("Act _parse_detail: raw 是字典但未找到有效的 best.detail")
-    elif isinstance(raw, str):
-        try:
-            detail = json.loads(raw)
-            _log(f"Act _parse_detail: 从字符串解析成功 -> {detail}")
-        except Exception as e:
-            _log(f"Act _parse_detail: 从字符串解析失败 -> {e}")
-
-    _log(f"Act _parse_detail: 最终 detail={detail}")
-    return detail

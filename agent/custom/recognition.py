@@ -5,7 +5,8 @@ from maa.context import Context
 import json
 import os
 import time
-import numpy as np  # 新增，用于判断图片数组
+import numpy as np
+
 
 def _log(msg):
     os.makedirs("debug", exist_ok=True)
@@ -71,7 +72,7 @@ class AutoReleasePetRecognition(CustomRecognition):
         argv: CustomRecognition.AnalyzeArg,
     ) -> CustomRecognition.AnalyzeResult:
 
-        # ====== 新增：检查截图 ======
+        # 检查截图
         image = argv.image
         if image is None:
             _log("Reco 错误: argv.image 为 None，截图不存在")
@@ -79,7 +80,6 @@ class AutoReleasePetRecognition(CustomRecognition):
             _log(f"Reco 截图信息: shape={image.shape}, dtype={image.dtype}, 是否为0尺寸={image.size == 0}")
         else:
             _log(f"Reco 截图信息: type={type(image).__name__}, value={str(image)[:200]}")
-        # ====== 新增结束 ======
 
         try:
             raw_param = argv.custom_recognition_param or "{}"
@@ -100,27 +100,16 @@ class AutoReleasePetRecognition(CustomRecognition):
         threshold = param["threshold"]
         slots = param["slots"]
 
-        # ====== 新增：检查模板文件 ======
-        import os as _os
-        template_path = f"assets/{template}"
-        if _os.path.exists(template_path):
-            _log(f"Reco 模板文件存在: {template_path}")
-        else:
-            _log(f"Reco 模板文件不存在: {template_path}")
-        # ====== 新增结束 ======
-
         released_nums = set()
         for i, slot in enumerate(slots):
             pet_num = i + 2
             entry = f"pet{pet_num}_check"
 
-            # ====== 新增：每次识别前打印详细参数 ======
             _log(f"pet_{pet_num} 开始识别: roi={slot}, template={template}, threshold={threshold}")
-            # ====== 新增结束 ======
 
             try:
                 match_result = context.run_recognition(
-                    entry, image,  # 使用前面保存的 image 变量
+                    entry, image,
                     pipeline_override={entry: {
                         "recognition": "TemplateMatch",
                         "template": template,
@@ -132,12 +121,10 @@ class AutoReleasePetRecognition(CustomRecognition):
                 _log(f"pet_{pet_num} 识别异常: {e}")
                 continue
 
-            # ====== 新增：打印 match_result 的详细信息 ======
             if match_result is None:
                 _log(f"pet_{pet_num} match_result 为 None")
             else:
-                _log(f"pet_{pet_num} match_result: hit={match_result.hit}, box={match_result.box}, all_results数量={len(match_result.all_results) if match_result.all_results else 0}")
-            # ====== 新增结束 ======
+                _log(f"pet_{pet_num} match_result: hit={match_result.hit}, box={match_result.box}")
 
             hit = match_result is not None and match_result.hit
             detail_info = ""
@@ -160,11 +147,12 @@ class AutoReleasePetRecognition(CustomRecognition):
             _log(f"Reco 结果: 无已释放槽位, box=None")
             return CustomRecognition.AnalyzeResult(
                 box=None,
-                detail=json.dumps({"next_num": None, "key_code": 0}),
+                detail="None,0",  # 改成逗号分隔格式
             )
 
-        detail_str = json.dumps({"next_num": next_num, "key_code": key_code})
-        _log(f"Reco 结果: released={sorted(released_nums)} unreleased={unreleased if released_nums else 'N/A'} next_num={next_num} key_code={key_code}")
+        # ====== 修改：用逗号分隔的简单字符串 ======
+        detail_str = f"{next_num},{key_code}"
+        _log(f"Reco 结果: released={sorted(released_nums)} unreleased={unreleased if released_nums else 'N/A'} next_num={next_num} key_code={key_code} detail_str={detail_str}")
 
         return CustomRecognition.AnalyzeResult(
                 box=(0, 0, 1, 1),
