@@ -55,10 +55,7 @@
         },
         {
             "name": "自动放宠",
-            "entry": "AutoReleasePet_Entry",
-            "option": [
-                "放宠设置"
-            ]
+            "entry": "AutoReleasePet_Entry"
         },
         {
             "name": "鼠标长按",
