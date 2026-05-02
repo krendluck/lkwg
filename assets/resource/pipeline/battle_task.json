@@ -1,57 +1,14 @@
 {
     "Auto_LaunchEntry": {
-        "recognition": "TemplateMatch",
-        "template": "Custom/Lanuch.png",
-        "roi": [
-            544,
-            496,
-            192,
-            85
-        ],
+        "recognition": "Custom",
+        "custom_recognition": "AutoLaunch_Check",
+        "custom_action_param": "{\"image\":Custom\/Lanuch.png, \"roi\":[544,496,192,85], \"threshold\":0.7}",
         "threshold": 0.7,
         "action": "Click",
-        "target": true,
         "post_delay": 500,
-        "timeout": 10000,
-        "next": [
-            "AutoLaunch_Click",
-            "Launch_End"
-        ],
-        "on_error": []
+        "timeout": 10000
     },
-    "AutoLaunch_Click": {
-        "recognition": "Custom",
-        "custom_recognition": "AutoLaunchReco",
-        "action": "Custom",
-        "custom_action": "AutoLaunchAct",
-        "post_delay": 500,
-        "next": [
-            "Launch_Check"
-        ]
-    },
-    "Launch_Check": {
-        "recognition": "TemplateMatch",
-        "template": "Custom/Lanuch.png",
-        "roi": [
-            544,
-            496,
-            192,
-            85
-        ],
-        "threshold": 0.7,
-        "timeout": 2000,
-        "next": [
-            "AutoLaunch_Click",
-            "Launch_End"
-        ]
-    },
-    "Launch_End": {
-        "recognition": "Custom",
-        "custom_recognition": "LaunchCheckReco",
-        "action": "Custom",
-        "custom_action": "LaunchCheckAct",
-        "next": []
-    },
+
     "Focus_EnergyEntry": {
         "recognition": "TemplateMatch",
         "template": "Battle/Energy.png",
@@ -122,10 +79,11 @@
         "next": "Battle_RunEntry"
     },
     "AutoReleasePet_Entry": {
-        "recognition": "DirectHit",
+        "recognition": "Custom",
+        "custom_recognition": "AutoReleasePet_recognition",
+        "custom_recognition_param": "{\"slots\":[[95,132,23,18],[95,186,23,18],[95,240,23,18],[95,294,23,18],[95,348,23,18]],\"threshold\":0.7}",
         "action": "Custom",
-        "custom_action": "AutoReleasePetAction",
-        "custom_action_param": "{\"slots\":[[95,132,23,18],[95,186,23,18],[95,240,23,18],[95,294,23,18],[95,348,23,18]],\"match_threshold\":0.7,\"debug_log\":true}",
+        "custom_action": "AutoReleasePetAct",
         "post_delay": 500,
         "next": "AutoReleasePet_Loop"
     },

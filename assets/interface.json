@@ -162,7 +162,7 @@
             ],
             "pipeline_override": {
                 "AutoReleasePet_Entry": {
-                    "custom_action_param": "{\"match_threshold\":「threshold」,\"debug_log\":true}"
+                    "custom_action_param": "{\"threshold\":threshold}"
                 }
             }
         },

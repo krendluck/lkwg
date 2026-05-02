@@ -36,13 +36,19 @@ class MyRecongition(CustomRecognition):
         except Exception:
             param = {}
 
-        # 从参数中取出配置项，提供默认值
+        # 从参数中取出配置项，三个参数都必须在 Pipeline 的 custom_recognition_param 中指定
         # template：模板图片的路径（相对于 resource/image 目录），如 "Custom/Lanuch.png"
         # threshold：模板匹配的相似度阈值，0~1，越大越严格
         # roi：识别区域 [x, y, width, height]，即只在截图的这个矩形区域内做匹配
-        threshold = param.get("threshold", 0.7)
-        roi = param.get("roi", [544, 496, 192, 85])
-        template = param.get("template", "Custom/Lanuch.png")
+        if "template" not in param:
+            raise ValueError("template 参数缺失，请在 custom_recognition_param 中指定模板图片路径，例如 \"template\": \"Custom/Lanuch.png\"")
+        if "threshold" not in param:
+            raise ValueError("threshold 参数缺失，请在 custom_recognition_param 中指定匹配阈值，例如 \"threshold\": 0.7")
+        if "roi" not in param:
+            raise ValueError("roi 参数缺失，请在 custom_recognition_param 中指定识别区域，例如 \"roi\": [544, 496, 192, 85]")
+        template = param["template"]
+        threshold = param["threshold"]
+        roi = param["roi"]
 
         # context.run_recognition()：在当前截图中执行指定名称的识别任务。
         # 参数1 "LauchCheck"：Pipeline 任务的名称（可以是已定义的，也可以是临时的）
@@ -65,11 +71,100 @@ class MyRecongition(CustomRecognition):
                 "threshold": threshold}},
         )
 
-        # CustomRecognition.AnalyzeResult：识别结果
-        #   box：识别到的区域坐标元组 (x, y, w, h)，传 None 表示未识别到
-        #   detail：识别结果详情，字符串或字典类型
-        #     这个 detail 会被传递给 Pipeline 中对应的 CustomAction，
-        #     通过 argv.reco_detail 可以在 Action 中获取到
+        # reco_detail 是 context.run_recognition() 的返回值，类型为 RecognitionDetail
+        # 关键字段：
+        #   .hit：bool — 是否匹配成功，True=匹配到，False=没匹配到
+        #   .box：Rect 或 None — 匹配到的区域坐标 (x, y, w, h)，未匹配到时为 None
+        #   .best_result：RecognitionResult 或 None — 最佳匹配结果
+        #     .best_result.detail：dict — 识别详情，模板匹配时包含 score 等信息
+        #   .raw_detail：dict — 原始识别详情
+
+        # 判断是否匹配成功
+        if reco_detail is not None and reco_detail.hit:
+            # 匹配成功：返回匹配到的区域和详情
+            # box 用 reco_detail.box 即模板在截图中的实际位置
+            # detail 中可以传入自定义信息，供后续 CustomAction 使用
+            score = 0.0
+            if reco_detail.best_result and isinstance(reco_detail.best_result.detail, dict):
+                score = reco_detail.best_result.detail.get("score", 0.0)
+
+            return CustomRecognition.AnalyzeResult(
+                box=reco_detail.box,
+                detail={"hit": True, "score": score, "roi" : roi},
+            )
+        else:
+            # 匹配失败：box 传 None，detail 标记未命中
+            return CustomRecognition.AnalyzeResult(
+                box=None,
+                detail={"hit": False},
+            )
+
+@AgentServer.custom_recognition("AutoReleasePet_recognition")
+class MyRecongition(CustomRecognition):        
+    def analyze(
+        self,
+        context: Context,
+        argv: CustomRecognition.AnalyzeArg,
+    ) -> CustomRecognition.AnalyzeResult:
+        
+        try:
+            param = json.loads(argv.custom_recognition_param or "{}")
+        except Exception:
+            param = {}
+
+        if "template" not in param:
+            raise ValueError("template 参数缺失，请在 custom_recognition_param 中指定模板图片路径，例如 \"template\": \"Custom/Lanuch.png\"")
+        if "threshold" not in param:
+            raise ValueError("threshold 参数缺失，请在 custom_recognition_param 中指定匹配阈值，例如 \"threshold\": 0.7")
+        if "slots" not in param:
+            raise ValueError("roi 参数缺失，请在 custom_recognition_param 中指定识别区域，例如 \"slots\": [[544, 496, 192, 85]]")
+        template = param["template"]
+        threshold = param["threshold"]
+        slots = param["slots"]
+
+        released_nums = set()
+        for i, slot in enumerate(slots):
+            pet_num = i + 2  # 槽位索引0对应宠物2
+            entry = f"pet{pet_num}_check"
+
+            try:
+                # 动态创建一个 TemplateMatch 识别任务，指定 ROI 和阈值
+                # override_pipeline 会临时添加/覆盖 pipeline 中的任务定义
+                context.override_pipeline({
+                    entry: {
+                        "recognition": "TemplateMatch",
+                        "template": template,
+                        "roi": slot,
+                        "threshold": threshold,
+                    }
+                })
+                # 用当前截图执行识别，返回匹配结果
+                match_result = context.run_recognition(entry, argv.image)
+            except Exception as e:
+                continue
+
+            # hit=True 表示在该区域匹配到了 status.png 模板，即此槽位宠物已释放
+            hit = match_result is not None and match_result.hit
+
+            if hit:
+                released_nums.add(pet_num)
+
+        # 根据检测结果决定要按哪个键
+        if released_nums:
+            unreleased = [n for n in range(2, 7) if n not in released_nums]
+            if unreleased:
+                # 有未释放的槽位 → 选编号最小的，按对应数字键放入宠物
+                next_num = min(unreleased)
+                key_code = 48 + next_num  # 数字键VK码: '2'=50, '3'=51, ...
+            else:
+                # 所有槽位都已释放 → 按数字键2切换到下一页继续放宠
+                next_num = "switch"
+                key_code = 50  # 数字键2
+        else:
+            # 没检测到任何已释放槽位 → 按数字键2（默认操作/切换页面）
+            next_num = None
+            key_code = 50  # 数字键2
+
         return CustomRecognition.AnalyzeResult(
-            box=(0, 0, 100, 100), detail="Hello World!"
-        )
+                detail={"next_num": next_num, "key_code": key_code},
+            )
