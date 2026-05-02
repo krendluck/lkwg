@@ -55,7 +55,7 @@
         },
         {
             "name": "自动放宠",
-            "entry": "AutoReleasePet_Entry"
+            "entry": "AutoReleasePet_Capture"
         },
         {
             "name": "鼠标长按",

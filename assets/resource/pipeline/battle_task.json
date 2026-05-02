@@ -77,6 +77,12 @@
         "post_delay": 500,
         "next": "Battle_RunEntry"
     },
+    "AutoReleasePet_Capture": {
+        "recognition": "DirectHit",
+        "action": "DoNothing",
+        "post_delay": 200,
+        "next": "AutoReleasePet_Entry"
+    },
     "AutoReleasePet_Entry": {
         "recognition": "Custom",
         "custom_recognition": "AutoReleasePet_recognition",
@@ -89,7 +95,7 @@
     "AutoReleasePet_Loop": {
         "recognition": "DirectHit",
         "post_delay": 500,
-        "next": "AutoReleasePet_Entry"
+        "next": "AutoReleasePet_Capture"
     },
     "MouseLongPressEntry": {
         "recognition": "DirectHit",
