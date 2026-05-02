@@ -3,6 +3,13 @@ from maa.custom_recognition import CustomRecognition
 from maa.context import Context
 
 import json
+import os
+import time
+
+def _log(msg):
+    os.makedirs("debug", exist_ok=True)
+    with open(os.path.join("debug", "release_log.txt"), "a", encoding="utf-8") as f:
+        f.write(f"[{time.strftime('%H:%M:%S')}] {msg}\n")
 
 @AgentServer.custom_recognition("AutoLaunch_Check")
 class AutoLaunchRecognition(CustomRecognition):
@@ -62,9 +69,13 @@ class AutoReleasePetRecognition(CustomRecognition):
     ) -> CustomRecognition.AnalyzeResult:
 
         try:
-            param = json.loads(argv.custom_recognition_param or "{}")
-        except Exception:
+            raw_param = argv.custom_recognition_param or "{}"
+            param = json.loads(raw_param)
+        except Exception as e:
+            _log(f"Reco 参数解析失败: raw={argv.custom_recognition_param} error={e}")
             param = {}
+
+        _log(f"Reco 开始, 收到参数: {param}")
 
         if "template" not in param:
             raise ValueError("template 参数缺失，请在 custom_recognition_param 中指定模板图片路径，例如 \"template\": \"Custom/Lanuch.png\"")
@@ -91,10 +102,15 @@ class AutoReleasePetRecognition(CustomRecognition):
                         "threshold": threshold,
                     }},
                 )
-            except Exception:
+            except Exception as e:
+                _log(f"pet_{pet_num} 识别异常: {e}")
                 continue
 
             hit = match_result is not None and match_result.hit
+            detail_info = ""
+            if match_result is not None and match_result.best_result:
+                detail_info = f" best_result={match_result.best_result.detail} box={match_result.box}"
+            _log(f"pet_{pet_num} roi={slot} hit={hit}{detail_info}")
 
             if hit:
                 released_nums.add(pet_num)
@@ -108,12 +124,14 @@ class AutoReleasePetRecognition(CustomRecognition):
                 next_num = -1
                 key_code = 50
         else:
+            _log(f"Reco 结果: 无已释放槽位, box=None")
             return CustomRecognition.AnalyzeResult(
                 box=None,
                 detail=json.dumps({"next_num": None, "key_code": 0}),
             )
 
         detail_str = json.dumps({"next_num": next_num, "key_code": key_code})
+        _log(f"Reco 结果: released={sorted(released_nums)} unreleased={unreleased if released_nums else 'N/A'} next_num={next_num} key_code={key_code}")
 
         return CustomRecognition.AnalyzeResult(
                 box=(0, 0, 1, 1),

@@ -26,8 +26,7 @@
         "next": "FocusEnergy_Click"
     },
     "FocusEnergy_Click": {
-        "recognition": "Custom",
-        "custom_recognition": "FocusEnergyReco",
+        "recognition": "DirectHit",
         "action": "Custom",
         "custom_action": "FocusEnergyAct",
         "post_delay": 500,

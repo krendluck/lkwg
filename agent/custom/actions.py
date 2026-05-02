@@ -10,6 +10,14 @@ from maa.custom_action import CustomAction
 from maa.context import Context
 
 import json
+import os
+import time
+
+
+def _log(msg):
+    os.makedirs("debug", exist_ok=True)
+    with open(os.path.join("debug", "release_log.txt"), "a", encoding="utf-8") as f:
+        f.write(f"[{time.strftime('%H:%M:%S')}] {msg}\n")
 
 
 @AgentServer.custom_action("AutoLaunchAct")
@@ -41,16 +49,26 @@ class AutoReleasePetAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
         reco_detail = argv.reco_detail
-        if reco_detail is None or not reco_detail.hit:
+        _log(f"Act run 开始 reco_detail={reco_detail}")
+        if reco_detail is None:
+            _log("Act 返回: reco_detail is None")
+            return False
+        _log(f"Act reco_detail.hit={reco_detail.hit} box={reco_detail.box} raw_detail={reco_detail.raw_detail}")
+        if not reco_detail.hit:
+            _log("Act 返回: reco_detail.hit 为 False")
             return False
 
         detail = _parse_detail(reco_detail)
         next_num = detail.get("next_num")
         key_code = detail.get("key_code")
+        _log(f"Act 解析 detail: next_num={next_num} key_code={key_code}")
         if next_num is None:
+            _log("Act 返回: next_num is None")
             return False
 
+        _log(f"Act 按键: post_click_key({key_code})")
         context.controller.post_click_key(key_code).wait()
+        _log("Act 返回: True")
         return True
 
 __all__ = [
@@ -63,11 +81,15 @@ def _parse_detail(reco_detail) -> dict:
     detail = {}
     if reco_detail is not None:
         raw = reco_detail.raw_detail
+        _log(f"Act _parse_detail: raw_detail type={type(raw).__name__} raw={raw}")
         if isinstance(raw, dict):
             detail = raw
         elif isinstance(raw, str):
             try:
                 detail = json.loads(raw)
-            except Exception:
+                _log(f"Act _parse_detail: json.loads 成功 -> {detail}")
+            except Exception as e:
+                _log(f"Act _parse_detail: json.loads 失败 -> {e}")
                 pass
+    _log(f"Act _parse_detail: 最终 detail={detail}")
     return detail
