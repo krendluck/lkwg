@@ -1,19 +1,8 @@
 from maa.agent.agent_server import AgentServer
-
 from maa.custom_recognition import CustomRecognition
-# Context：MAA 上下文对象，提供运行时能力：
-#   - context.run_recognition()：调用其他 Pipeline 识别任务
-#   - context.override_pipeline()：覆盖 Pipeline 配置（影响整个任务后续调用）
-#   - context.clone()：克隆上下文，克隆后的修改不影响原始上下文
-#   - context.override_next()：动态修改当前节点的下一步跳转
 from maa.context import Context
 
 import json
-
-
-# @AgentServer.custom_recognition("name") 装饰器：
-# 将这个类注册为名为 "AutoLaunch_Check" 的自定义识别器。
-# 在 Pipeline JSON 中通过 "custom_recognition": "AutoLaunch_Check" 引用此识别器。
 @AgentServer.custom_recognition("AutoLaunch_Check")
 class MyRecongition(CustomRecognition):
 
@@ -47,26 +36,31 @@ class MyRecongition(CustomRecognition):
         except Exception:
             param = {}
 
-        # 从参数中取出阈值和 ROI，提供默认值
+        # 从参数中取出配置项，提供默认值
+        # template：模板图片的路径（相对于 resource/image 目录），如 "Custom/Lanuch.png"
+        # threshold：模板匹配的相似度阈值，0~1，越大越严格
+        # roi：识别区域 [x, y, width, height]，即只在截图的这个矩形区域内做匹配
         threshold = param.get("threshold", 0.7)
         roi = param.get("roi", [544, 496, 192, 85])
+        template = param.get("template", "Custom/Lanuch.png")
 
         # context.run_recognition()：在当前截图中执行指定名称的识别任务。
         # 参数1 "LauchCheck"：Pipeline 任务的名称（可以是已定义的，也可以是临时的）
-        # 参数2 argv.image：待识别的截图图像（由 MaaFramework 自动传入，必须传）
+        # 参数2 argv.image：待识别的截图图像（由 MaaFramework 自动传入的当前画面截图，BGR 格式的 numpy 数组）
         # 参数3 pipeline_override：临时覆盖 Pipeline 配置，仅影响本次调用。
         #   这里定义了一个名为 "LauchCheck" 的临时识别任务：
-        #     - "recognition": "TemplateMatch" — 使用模板匹配识别
-        #     - "template": "Custom/Lanuch.png" — 匹配的模板图片
-        #     - "roi": 区域坐标 — 在截图的指定区域匹配
+        #     - "recognition": "TemplateMatch" — 使用模板匹配识别算法
+        #     - "template": 模板图片路径 — 用来和截图做对比的图片
+        #     - "roi": 识别区域 — 只在截图的指定矩形区域内匹配，提高速度和准确度
         #     - "threshold": 匹配阈值 — 相似度大于此值才算匹配成功
         #   注意：pipeline_override 中必须包含 recognition 字段，否则无法识别
+        #   注意：template 和 argv.image 是不同的！template 是模板图片路径，argv.image 是当前截图
         reco_detail = context.run_recognition(
             "LauchCheck",
             argv.image,
             pipeline_override={"LauchCheck": {
                 "recognition": "TemplateMatch",
-                "template": "Custom/Lanuch.png",
+                "template": template,
                 "roi": roi,
                 "threshold": threshold}},
         )
