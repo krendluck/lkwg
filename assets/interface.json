@@ -147,25 +147,6 @@
                 }
             ]
         },
-        "放宠设置": {
-            "type": "input",
-            "label": "放宠参数",
-            "inputs": [
-                {
-                    "name": "threshold",
-                    "label": "匹配阈值(0.0-1.0)",
-                    "default": "0.7",
-                    "pipeline_type": "int",
-                    "verify": "^0?\\.?\\d+$",
-                    "pattern_msg": "请输入0-1之间的数字"
-                }
-            ],
-            "pipeline_override": {
-                "AutoReleasePet_Entry": {
-                    "custom_action_param": "{\"threshold\":threshold}"
-                }
-            }
-        },
         "映射按键": {
             "type": "input",
             "label": "鼠标长按设置",
