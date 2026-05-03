@@ -30,7 +30,7 @@
     "agent": {
         "child_exec": "python",
         "child_args": [
-            "./agent/main.py"
+            "../agent/main.py"
         ]
     },
     "task": [
@@ -55,7 +55,10 @@
         },
         {
             "name": "自动放宠",
-            "entry": "AutoReleasePet_Entry"
+            "entry": "AutoReleasePet_Entry",
+            "option": [
+                "轮询间隔"
+            ]
         },
         {
             "name": "鼠标长按",
@@ -144,6 +147,34 @@
                 }
             ]
         },
+        "轮询间隔":{
+            "type": "input",
+            "inputs": [
+                {
+                    "name": "polling_interval",
+                    "label": "轮询间隔",
+                    "default": "2",
+                    "pipeline_type": "int",
+                    "verify": "^[1-9]$",
+                    "pattern_msg": "输入轮询间隔1-9s"
+                },
+                {
+                    "name": "checke_interval",
+                    "label": "检测间隔",
+                    "default": "500",
+                    "pipeline_type": "int",
+                    "verify": "^[1-9][0-9]*$",
+                    "pattern_msg": "请输入轮询间隔(ms),为正整数,例如500"
+                }
+            ],
+            "pipeline_override": {
+                "AutoReleasePet_Entry":{
+                    "custom_recognition_param" : "{\"polling_interval\":polling_interval}",
+                    "post_delay": "{checke_interval}"
+                
+                }
+            }
+        },
         "映射按键": {
             "type": "input",
             "label": "鼠标长按设置",
@@ -159,7 +190,7 @@
             ],
             "pipeline_override": {
                 "MouseLongPressEntry": {
-                    "custom_action_param": "{\"key\":\"「key」\"}"
+                    "custom_action_param": "{\"key\": key}"
                 }
             }
         }

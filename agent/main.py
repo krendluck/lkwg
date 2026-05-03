@@ -15,8 +15,6 @@ from maa.toolkit import Toolkit
 
 # 导入自定义模块，注册所有 CustomAction 和 CustomRecognition
 import custom
-import custom.actions
-import custom.mouse_long_press_action
 
 def main():
     # 初始化 MaaFramework 配置，使用当前目录下的配置文件
