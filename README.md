@@ -1,30 +1,23 @@
-<!-- markdownlint-disable MD033 MD041 -->
-<p align="center">
-  <img alt="LOGO" src="https://cdn.jsdelivr.net/gh/MaaAssistantArknights/design@main/logo/maa-logo_512x512.png" width="256" height="256" />
-</p>
+# MaaLK
 
-<div align="center">
+基于 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 的洛克王国：世界自动化工具。
 
-# MaaPracticeBoilerplate
+## 功能
 
-</div>
+- **挖矿放宠**：YOLO神经网络模型检测矿石，识别后自动按住鼠标挖矿，挖矿完成后自动放出宠物并轮换切换
+- **自动放宠**：检测宠物槽位状态，优先放出未释放宠物，全部放出后按键轮换
+- **战斗脱离**：挖矿放宠过程中检测到战斗自动ESC退出
+- **石头检测**：识别6种矿石（黑石、蓝珊瑚、蓝石、紫石、红珊瑚、黄石）
+- **自动启动**：模板匹配检测游戏状态并自动点击进入
+- **专注能量**：一键点击专注能量按钮
 
-本仓库为 [MaaFramework](https://github.com/MaaXYZ/MaaFramework) 所提供的项目模板，开发者可基于此模板直接创建自己的 MaaXXX 项目。
+## 可配置项
 
-> **MaaFramework** 是基于图像识别技术、运用 [MAA](https://github.com/MaaAssistantArknights/MaaAssistantArknights) 开发经验去芜存菁、完全重写的新一代自动化黑盒测试框架。
-> 低代码的同时仍拥有高扩展性，旨在打造一款丰富、领先、且实用的开源库，助力开发者轻松编写出更好的黑盒测试程序，并推广普及。
+- 挖矿按住时长、轮询间隔、检测间隔均可自定义
 
-## 即刻开始
+## 开发
 
 请阅读[如何开发](./docs/zh_cn/develop/how_to_develop.md)
-
-## 生态共建
-
-MAA 正计划建设为一类项目，而非舟的单一软件。
-
-若您的项目依赖于 MaaFramework，我们欢迎您将它命名为 MaaXXX, MXA, MAX 等等。当然，这是许可而不是限制，您也可以自由选择其他与 MAA 无关的名字，完全取决于您自己的想法！
-
-同时，我们也非常欢迎您提出 PR，在 [社区项目列表](https://github.com/MaaXYZ/MaaFramework#%E7%A4%BE%E5%8C%BA%E9%A1%B9%E7%9B%AE) 中添加上您的项目！
 
 ## 常见问题
 
@@ -33,7 +26,3 @@ MAA 正计划建设为一类项目，而非舟的单一软件。
 ## 鸣谢
 
 本项目由 **[MaaFramework](https://github.com/MaaXYZ/MaaFramework)** 强力驱动！
-
-感谢以下开发者对本项目作出的贡献（下面链接改成你自己的项目地址）:
-
-[![Contributors](https://contrib.rocks/image?repo=MaaXYZ/MaaFramework&max=1000)](https://github.com/MaaXYZ/MaaFramework/graphs/contributors)
