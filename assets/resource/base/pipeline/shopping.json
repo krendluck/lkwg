@@ -64,7 +64,7 @@
     },
     "MapTeleport_FindTransport": {
         "recognition": "OCR",
-        "roi": [1000, 661, 44, 32],
+        "roi": [987, 658, 72, 38],
         "expected": ["传送"],
         "timeout": 5000,
         "rate_limit": 1000,

@@ -316,6 +316,7 @@ class MapTeleportCheckSelectedAct(CustomAction):
 @AgentServer.custom_action("MapTeleportBuyLoopAct")
 class MapTeleportBuyLoopAct(CustomAction):
 
+    ITEM_LIST_ROI = [64, 70, 391, 648]
     BUY_ROI = [989, 664, 73, 27]
     SOLD_OUT_TEXTS = "已售罄"
     SWIPE_START_ROI = [679, 439, 19, 38]
@@ -324,9 +325,37 @@ class MapTeleportBuyLoopAct(CustomAction):
     CONFIRM_CLICK_ROI = [720, 579, 46, 27]
     SCREEN_CENTER = [960, 540]
 
-    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
-        ctrl = context.tasker.controller
+    def _get_wishlist(self, context):
+        node_obj = context.get_node_object("MapTeleport_BuyLoop")
+        attach = getattr(node_obj, "attach", {}) if node_obj else {}
+        return sorted(k[5:] for k, v in attach.items() if k.startswith("_buy_") and v)
 
+    def _swipe_and_confirm(self, ctrl):
+        swipe_roi = self.SWIPE_START_ROI
+        start_x = swipe_roi[0] + swipe_roi[2] // 2
+        start_y = swipe_roi[1] + swipe_roi[3] // 2
+        end_x = start_x + self.SWIPE_DIST_X
+
+        print(f"[MapTeleport] 滑块拖动 ({start_x},{start_y}) -> ({end_x},{start_y})")
+        ctrl.post_touch_down(start_x, start_y, contact=0).wait()
+        time.sleep(0.3)
+        for i in range(1, self.SWIPE_STEPS + 1):
+            move_x = start_x + (self.SWIPE_DIST_X * i // self.SWIPE_STEPS)
+            ctrl.post_touch_move(move_x, start_y, contact=0).wait()
+            time.sleep(0.02)
+        ctrl.post_touch_up(contact=0).wait()
+        time.sleep(0.5)
+
+        confirm_roi = self.CONFIRM_CLICK_ROI
+        confirm_x = confirm_roi[0] + confirm_roi[2] // 2
+        confirm_y = confirm_roi[1] + confirm_roi[3] // 2
+        print(f"[MapTeleport] 确认购买点击({confirm_x},{confirm_y})")
+        ctrl.post_click(confirm_x, confirm_y).wait()
+        time.sleep(1.0)
+        ctrl.post_click(confirm_x, confirm_y).wait()
+        time.sleep(1.0)
+
+    def _buy_all(self, ctrl, context):
         for buy_loop in range(5):
             time.sleep(1.0)
             ctrl.post_screencap().wait()
@@ -371,36 +400,109 @@ class MapTeleportBuyLoopAct(CustomAction):
             print(f"[MapTeleport] 找到购买按钮，点击({x},{y})")
             ctrl.post_click(x, y).wait()
             time.sleep(0.5)
-
-            swipe_roi = self.SWIPE_START_ROI
-            start_x = swipe_roi[0] + swipe_roi[2] // 2
-            start_y = swipe_roi[1] + swipe_roi[3] // 2
-            end_x = start_x + self.SWIPE_DIST_X
-
-            print(f"[MapTeleport] 滑块拖动 ({start_x},{start_y}) -> ({end_x},{start_y})")
-            ctrl.post_touch_down(start_x, start_y, contact=0).wait()
-            time.sleep(0.3)
-            for i in range(1, self.SWIPE_STEPS + 1):
-                move_x = start_x + (self.SWIPE_DIST_X * i // self.SWIPE_STEPS)
-                ctrl.post_touch_move(move_x, start_y, contact=0).wait()
-                time.sleep(0.02)
-            ctrl.post_touch_up(contact=0).wait()
-            time.sleep(0.5)
-
-            confirm_roi = self.CONFIRM_CLICK_ROI
-            confirm_x = confirm_roi[0] + confirm_roi[2] // 2
-            confirm_y = confirm_roi[1] + confirm_roi[3] // 2
-            print(f"[MapTeleport] 确认购买点击({confirm_x},{confirm_y})")
-            ctrl.post_click(confirm_x, confirm_y).wait()
-            time.sleep(1.0)
-            ctrl.post_click(confirm_x, confirm_y).wait()
-            time.sleep(1.0)
+            self._swipe_and_confirm(ctrl)
 
         print("[MapTeleport] 购买循环达到上限，退出")
         context.run_task("MapTeleport_PressEsc")
         time.sleep(0.5)
         ctrl.post_click(self.SCREEN_CENTER[0], self.SCREEN_CENTER[1]).wait()
         return True
+
+    def _buy_filtered(self, ctrl, context, wishlist):
+        bought = set()
+
+        for item in wishlist:
+            if item in bought:
+                continue
+
+            ctrl.post_screencap().wait()
+            image = ctrl.cached_image
+            if image is None:
+                continue
+
+            save_debug(ctrl, f"item_scan_{item}")
+
+            scan_result = context.run_recognition(
+                "MapTeleport_ItemScan",
+                image,
+                pipeline_override={"MapTeleport_ItemScan": {
+                    "recognition": "OCR",
+                    "roi": self.ITEM_LIST_ROI,
+                }},
+            )
+
+            if scan_result is None or not scan_result.hit:
+                print(f"[MapTeleport] 未在列表中检测到任何物品文字，跳过 {item}")
+                continue
+
+            found = False
+            for result in (scan_result.all_results or []):
+                text = result.text or ""
+                if item in text:
+                    box = result.box
+                    x = box[0] + box[2] // 2
+                    y = box[1] + box[3] // 2
+                    print(f"[MapTeleport] 找到 {item}(\"{text}\") @({x},{y})，点击")
+                    ctrl.post_click(x, y).wait()
+                    time.sleep(0.5)
+                    found = True
+                    break
+
+            if not found:
+                print(f"[MapTeleport] 列表中未找到 {item}，跳过")
+                continue
+
+            ctrl.post_screencap().wait()
+            image = ctrl.cached_image
+            if image is None:
+                continue
+
+            buy_result = context.run_recognition(
+                "MapTeleport_BuyCheck",
+                image,
+                pipeline_override={"MapTeleport_BuyCheck": {
+                    "recognition": "OCR",
+                    "roi": self.BUY_ROI,
+                    "expected": ["购买", "已售罄"],
+                    "order_by": "Horizontal",
+                }},
+            )
+
+            if buy_result is None or not buy_result.hit:
+                print(f"[MapTeleport] 未检测到 购买/已售罄，跳过 {item}")
+                continue
+
+            result = buy_result.all_results[0] if buy_result.all_results else []
+            if result.text == self.SOLD_OUT_TEXTS:
+                print(f"[MapTeleport] {item} 已售罄，跳过")
+                continue
+
+            box = buy_result.box
+            x = box[0] + box[2] // 2
+            y = box[1] + box[3] // 2
+            print(f"[MapTeleport] 购买 {item}，点击({x},{y})")
+            ctrl.post_click(x, y).wait()
+            time.sleep(0.5)
+
+            self._swipe_and_confirm(ctrl)
+            bought.add(item)
+            print(f"[MapTeleport] {item} 购买完成")
+
+        print(f"[MapTeleport] 愿望清单处理完毕，已购买: {bought}")
+        context.run_task("MapTeleport_PressEsc")
+        time.sleep(0.5)
+        ctrl.post_click(self.SCREEN_CENTER[0], self.SCREEN_CENTER[1]).wait()
+        return True
+
+    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        ctrl = context.tasker.controller
+        wishlist = self._get_wishlist(context)
+
+        if not wishlist:
+            return self._buy_all(ctrl, context)
+
+        print(f"[MapTeleport] 愿望清单: {wishlist}")
+        return self._buy_filtered(ctrl, context, wishlist)
 
 
 @AgentServer.custom_action("ScreenshotSave")
