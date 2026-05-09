@@ -1,0 +1,22 @@
+{
+    "ScreenshotSave_Entry": {
+        "recognition": "DirectHit",
+        "timeout": -1,
+        "next": "ScreenshotSave"
+    },
+    "ScreenshotSave": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "ScreenshotSave",
+        "post_delay": 1000,
+        "next": "ScreenshotSave_Loop",
+        "attach": {
+            "save_dir": "debug/screenshots",
+            "prefix": "screenshot"
+        }
+    },
+    "ScreenshotSave_Loop": {
+        "recognition": "DirectHit",
+        "next": "ScreenshotSave"
+    }
+}

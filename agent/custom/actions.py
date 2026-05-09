@@ -213,59 +213,73 @@ class MapTeleportAct(CustomAction):
 
         ctrl.post_screencap().wait()
         image = ctrl.cached_image
-        save_debug(ctrl, "teleport_icon")
 
-        icon_result = context.run_recognition(
-            "MapTeleport_FindIcon",
-            image,
-            pipeline_override={"MapTeleport_FindIcon": {
-                "recognition": "TemplateMatch",
-                "template": "Map/TeleportIcon.png",
-                "roi": self.TELEPORT_ICON_ROI,
-                "threshold": 0.7,
-            }},
-        )
+        for teleport_attempt in range(5):
+            save_debug(ctrl, f"teleport_icon_{teleport_attempt}")
 
-        if icon_result is not None and icon_result.hit:
-            box = icon_result.box
-            x = box[0] + box[2] // 2
-            y = box[1] + box[3] // 2
-            print(f"[MapTeleport] 找到传送点图标，点击({x},{y})")
-            ctrl.post_click(x, y).wait()
+            icon_result = context.run_recognition(
+                "MapTeleport_FindIcon",
+                image,
+                pipeline_override={"MapTeleport_FindIcon": {
+                    "recognition": "TemplateMatch",
+                    "template": "Map/TeleportIcon.png",
+                    "roi": self.TELEPORT_ICON_ROI,
+                    "threshold": 0.7,
+                }},
+            )
+
+            if icon_result is not None and icon_result.hit:
+                box = icon_result.box
+                x = box[0] + box[2] // 2
+                y = box[1] + box[3] // 2
+                print(f"[MapTeleport] 找到传送点图标，点击({x},{y})")
+                ctrl.post_click(x, y).wait()
+                break
+            print(f"[MapTeleport] 未找到传送点图标，等待重试 (第{teleport_attempt+1}次)")
+            time.sleep(1.0)
+            ctrl.post_screencap().wait()
+            image = ctrl.cached_image
         else:
             roi = self.TELEPORT_ICON_ROI
             x = roi[0] + roi[2] // 2
             y = roi[1] + roi[3] // 2
-            print(f"[MapTeleport] 未找到传送点图标(模板)，fallback点击({x},{y})")
+            print(f"[MapTeleport] 多次未找到传送点图标，fallback点击({x},{y})")
             ctrl.post_click(x, y).wait()
 
         time.sleep(0.5)
         ctrl.post_screencap().wait()
         image = ctrl.cached_image
-        save_debug(ctrl, "secondary_icon")
 
-        sec_result = context.run_recognition(
-            "MapTeleport_Secondary",
-            image,
-            pipeline_override={"MapTeleport_Secondary": {
-                "recognition": "TemplateMatch",
-                "template": "Map/SecondaryIcon.png",
-                "roi": self.SECONDARY_ICON_ROI,
-                "threshold": 0.7,
-            }},
-        )
+        for sec_attempt in range(5):
+            save_debug(ctrl, f"secondary_icon_{sec_attempt}")
 
-        if sec_result is not None and sec_result.hit:
-            box = sec_result.box
-            x = box[0] + box[2] // 2
-            y = box[1] + box[3] // 2
-            print(f"[MapTeleport] 确认二级图标，点击({x},{y})")
-            ctrl.post_click(x, y).wait()
+            sec_result = context.run_recognition(
+                "MapTeleport_Secondary",
+                image,
+                pipeline_override={"MapTeleport_Secondary": {
+                    "recognition": "TemplateMatch",
+                    "template": "Map/SecondaryIcon.png",
+                    "roi": self.SECONDARY_ICON_ROI,
+                    "threshold": 0.7,
+                }},
+            )
+
+            if sec_result is not None and sec_result.hit:
+                box = sec_result.box
+                x = box[0] + box[2] // 2
+                y = box[1] + box[3] // 2
+                print(f"[MapTeleport] 确认二级图标，点击({x},{y})")
+                ctrl.post_click(x, y).wait()
+                break
+            print(f"[MapTeleport] 未确认二级图标，等待重试 (第{sec_attempt+1}次)")
+            time.sleep(1.0)
+            ctrl.post_screencap().wait()
+            image = ctrl.cached_image
         else:
             roi = self.SECONDARY_ICON_ROI
             x = roi[0] + roi[2] // 2
             y = roi[1] + roi[3] // 2
-            print(f"[MapTeleport] 未确认二级图标，fallback点击({x},{y})")
+            print(f"[MapTeleport] 多次未确认二级图标，fallback点击({x},{y})")
             ctrl.post_click(x, y).wait()
 
         time.sleep(0.3)

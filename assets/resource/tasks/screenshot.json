@@ -1,0 +1,50 @@
+{
+    "task": [
+        {
+            "name": "调试截图",
+            "entry": "ScreenshotSave_Entry",
+            "option": [
+                "截图设置"
+            ],
+            "group": ["demo"]
+        }
+    ],
+    "option": {
+        "截图设置": {
+            "type": "input",
+            "inputs": [
+                {
+                    "name": "截图间隔(ms)",
+                    "label": "截图间隔(ms)",
+                    "default": "1000",
+                    "pipeline_type": "int",
+                    "verify": "^[1-9][0-9]*$",
+                    "pattern_msg": "请输入正整数(ms)"
+                },
+                {
+                    "name": "保存目录",
+                    "label": "保存目录(相对路径)",
+                    "default": "debug/screenshots",
+                    "verify": "^.+$",
+                    "pattern_msg": "请输入有效路径"
+                },
+                {
+                    "name": "文件前缀",
+                    "label": "文件名前缀",
+                    "default": "screenshot",
+                    "verify": "^[a-zA-Z0-9_-]+$",
+                    "pattern_msg": "请输入英文/数字/下划线/横线"
+                }
+            ],
+            "pipeline_override": {
+                "ScreenshotSave": {
+                    "post_delay": "{截图间隔(ms)}",
+                    "attach": {
+                        "save_dir": "{保存目录}",
+                        "prefix": "{文件前缀}"
+                    }
+                }
+            }
+        }
+    }
+}
