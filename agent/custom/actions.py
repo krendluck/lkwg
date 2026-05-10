@@ -189,6 +189,7 @@ class MapTeleportVerifyAct(CustomAction):
                 print(f"[MapTeleport] 地图可能未打开，等待... (第{attempt+1}次)")
                 context.run_task("MapTeleport_MainLoop",
                                 pipeline_override={"MapTeleport_MainLoop": {
+                                    "next": []
                                 }})
                 time.sleep(1.0)
 
@@ -330,7 +331,14 @@ class MapTeleportBuyLoopAct(CustomAction):
     def _get_wishlist(self, context):
         node_obj = context.get_node_object("MapTeleport_BuyLoop")
         attach = getattr(node_obj, "attach", {}) if node_obj else {}
-        return sorted(k[5:] for k, v in attach.items() if k.startswith("_buy_") and v)
+        raw = [k[5:] for k, v in attach.items() if k.startswith("_buy_") and v]
+        expanded = []
+        for item in raw:
+            if item == "矿石":
+                expanded.extend(["黑", "蓝", "紫", "黄"])
+            else:
+                expanded.append(item)
+        return sorted(expanded)
 
     def _swipe_and_confirm(self, ctrl):
         swipe_roi = self.SWIPE_START_ROI
@@ -410,6 +418,9 @@ class MapTeleportBuyLoopAct(CustomAction):
         ctrl.post_click(self.SCREEN_CENTER[0], self.SCREEN_CENTER[1]).wait()
         return True
 
+    def _match_item(self, item, text):
+        return item in text
+
     def _buy_filtered(self, ctrl, context, wishlist):
         bought = set()
 
@@ -440,7 +451,7 @@ class MapTeleportBuyLoopAct(CustomAction):
             found = False
             for result in (scan_result.all_results or []):
                 text = result.text or ""
-                if item in text:
+                if self._match_item(item, text):
                     box = result.box
                     x = box[0] + box[2] // 2
                     y = box[1] + box[3] // 2

@@ -93,6 +93,17 @@
                             }
                         }
                     }
+                },
+                {
+                    "name": "矿石",
+                    "label": "矿石",
+                    "pipeline_override": {
+                        "MapTeleport_BuyLoop": {
+                            "attach": {
+                                "_buy_矿石": true
+                            }
+                        }
+                    }
                 }
             ]
         }
