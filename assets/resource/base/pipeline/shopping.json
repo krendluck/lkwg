@@ -148,8 +148,9 @@
     },
     "MapTeleport_Press1": {
         "recognition": "DirectHit",
-        "action": "ClickKey",
+        "action": "LongPressKey",
         "key": 49,
+        "duration": 300,
         "post_delay": 1000,
         "next": ["MapTeleport_BuyLoop"]
     },

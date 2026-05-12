@@ -31,6 +31,15 @@ def save_debug(ctrl, name, prefix="debug"):
         print(f"[Debug] saved: {filepath}")
     except Exception as e:
         print(f"[Debug] save error: {e}")
+
+@AgentServer.custom_action("TestAct")
+class TestAct(CustomAction):
+    def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
+        x, y = 640, 360
+        ctrl = context.tasker.controller
+        ctrl.post_click_key(78).wait()
+        return True
+    
 @AgentServer.custom_action("AutoLaunchAct")
 class AutoLaunchAct(CustomAction):
 
@@ -50,7 +59,9 @@ class AutoLaunchAct(CustomAction):
 class FocusEnergyAct(CustomAction):
 
     def run(self, context: Context, argv: CustomAction.RunArg) -> bool:
-        context.tasker.controller.post_click(62, 633).wait()
+        x, y = 62, 633
+        ctrl = context.tasker.controller
+        ctrl.post_click(x, y, contact=0).wait()
         return True
 
 

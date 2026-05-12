@@ -14,11 +14,9 @@
                 "class_regex": ".*",
                 "window_regex": "洛克王国：世界",
                 "screencap": "FramePool",
-                "mouse": "Seize",
-                "keyboard": "Seize"
-            },
-            "permission_required": true
-            
+                "mouse": "LegacyEvent",
+                "keyboard": "LegacyEvent"
+            }
         }
     ],
     "resource": [
@@ -59,6 +57,7 @@
         "resource/tasks/stone_detect.json",
         "resource/tasks/stone_mine_pet.json",
         "resource/tasks/screenshot.json",
-        "resource/tasks/shopping.json"
+        "resource/tasks/shopping.json",
+        "resource/tasks/test.json"
     ]
 }
