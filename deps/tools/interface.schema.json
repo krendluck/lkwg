@@ -481,7 +481,8 @@
                                 "SendMessageWithCursorPos",
                                 "PostMessageWithCursorPos",
                                 "SendMessageWithWindowPos",
-                                "PostMessageWithWindowPos"
+                                "PostMessageWithWindowPos",
+                                "Interception"
                             ]
                         },
                         "keyboard": {
@@ -496,7 +497,8 @@
                                 "SendMessageWithCursorPos",
                                 "PostMessageWithCursorPos",
                                 "SendMessageWithWindowPos",
-                                "PostMessageWithWindowPos"
+                                "PostMessageWithWindowPos",
+                                "Interception"
                             ]
                         },
                         "screencap": {

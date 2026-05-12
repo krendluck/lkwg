@@ -14,8 +14,8 @@
                 "class_regex": ".*",
                 "window_regex": "洛克王国：世界",
                 "screencap": "FramePool",
-                "mouse": "LegacyEvent",
-                "keyboard": "LegacyEvent"
+                "mouse": "Interception",
+                "keyboard": "Interception"
             }
         }
     ],
