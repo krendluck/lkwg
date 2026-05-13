@@ -53,6 +53,7 @@
     "import": [
         "resource/tasks/auto_launch.json",
         "resource/tasks/focus_energy.json",
+        "resource/tasks/auto_battle.json",
         "resource/tasks/battle_run.json",
         "resource/tasks/auto_release_pet.json",
         "resource/tasks/stone_detect.json",

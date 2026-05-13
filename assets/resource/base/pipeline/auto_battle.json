@@ -1,0 +1,34 @@
+{
+    "AutoBattle_Entry": {
+        "recognition": "TemplateMatch",
+        "template": "Battle/ESC.png",
+        "roi": [920, 613, 91, 92],
+        "threshold": 0.7,
+        "action": "DoNothing",
+        "post_delay": 500,
+        "timeout": -1,
+        "next": "AutoBattle_WaitSkill1"
+    },
+    "AutoBattle_WaitSkill1": {
+        "recognition": "OCR",
+        "roi": [147, 257, 21, 17],
+        "expected": ["1"],
+        "action": "DoNothing",
+        "post_delay": 300,
+        "timeout": 30000,
+        "next": "AutoBattle_ExecuteRound",
+        "on_error": "AutoBattle_Done"
+    },
+    "AutoBattle_ExecuteRound": {
+        "recognition": "DirectHit",
+        "action": "Custom",
+        "custom_action": "AutoBattleAct",
+        "post_delay": 2000,
+        "next": "AutoBattle_WaitSkill1"
+    },
+    "AutoBattle_Done": {
+        "recognition": "DirectHit",
+        "action": "DoNothing",
+        "timeout": -1
+    }
+}

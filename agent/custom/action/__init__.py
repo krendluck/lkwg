@@ -3,6 +3,7 @@ from importlib import import_module
 ACTION_MODULES = (
     "general",
     "auto_launch",
+    "auto_battle",
     "focus_energy",
     "release_pet",
     "stone_detect",

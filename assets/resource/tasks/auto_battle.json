@@ -1,0 +1,34 @@
+{
+    "task": [
+        {
+            "name": "自动战斗",
+            "entry": "AutoBattle_Entry",
+            "option": [
+                "技能顺序"
+            ],
+            "group": ["battle"]
+        }
+    ],
+    "option": {
+        "技能顺序": {
+            "type": "input",
+            "inputs": [
+                {
+                    "name": "skill_order",
+                    "label": "技能顺序 (1-4=技能, x=聚能, q=背包, r=关闭背包)",
+                    "default": "1x2x3x4x",
+                    "pipeline_type": "str",
+                    "verify": "^[1-4xXqQrR]+$",
+                    "pattern_msg": "只能包含 1-4, x(聚能), q(背包), r(关闭背包)"
+                }
+            ],
+            "pipeline_override": {
+                "AutoBattle_WaitSkill1": {
+                    "attach": {
+                        "skill_order": "{skill_order}"
+                    }
+                }
+            }
+        }
+    }
+}
