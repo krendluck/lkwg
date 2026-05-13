@@ -91,7 +91,7 @@ def install_deps():
             install_path / "libs" / "MaaAgentBinary",
             dirs_exist_ok=True,
         )
-shutil.copytree(
+        shutil.copytree(
             working_dir / "deps" / "bin" / "plugins",
             install_path / "plugins" / get_dotnet_platform_tag(),
             dirs_exist_ok=True,
