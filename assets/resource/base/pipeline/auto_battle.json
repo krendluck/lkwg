@@ -27,8 +27,7 @@
         "action": "Custom",
         "custom_action": "AutoBattleAct",
         "post_delay": 1500,
-        "next": "AutoBattle_WaitReady",
-        "on_error": "AutoBattle_WaitReady"
+        "next": "AutoBattle_WaitReady"
     },
     "AutoBattle_WaitBackpackR": {
         "recognition": "OCR",
