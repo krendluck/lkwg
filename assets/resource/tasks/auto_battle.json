@@ -5,6 +5,7 @@
             "entry": "AutoBattle_Entry",
             "option": [
                 "战斗类型",
+                "使用印记",
                 "技能顺序"
             ],
             "group": ["battle"]
@@ -17,33 +18,11 @@
             "cases": [
                 {
                     "name": "legendary",
-                    "label": "传说精灵",
-                    "pipeline_override": {
-                        "AutoBattle_BattleEndCheck": {
-                            "roi": [719, 582, 44, 21],
-                            "expected": ["确认"]
-                        },
-                        "AutoBattle_UseMark": {
-                            "attach": {
-                                "use_mark": "true"
-                            }
-                        }
-                    }
+                    "label": "传说精灵"
                 },
                 {
                     "name": "boss",
-                    "label": "精灵首领",
-                    "pipeline_override": {
-                        "AutoBattle_BattleEndCheck": {
-                            "roi": [719, 582, 44, 21],
-                            "expected": ["确认"]
-                        },
-                        "AutoBattle_UseMark": {
-                            "attach": {
-                                "use_mark": "false"
-                            }
-                        }
-                    }
+                    "label": "精灵首领"
                 },
                 {
                     "name": "rare",
@@ -52,10 +31,26 @@
                         "AutoBattle_BattleEndCheck": {
                             "roi": [1230, 673, 14, 11],
                             "expected": ["w"]
-                        },
+                        }
+                    }
+                }
+            ]
+        },
+        "使用印记": {
+            "type": "select",
+            "default_case": "不使用",
+            "cases": [
+                {
+                    "name": "不使用",
+                    "label": "不使用"
+                },
+                {
+                    "name": "使用",
+                    "label": "使用",
+                    "pipeline_override": {
                         "AutoBattle_UseMark": {
                             "attach": {
-                                "use_mark": "false"
+                                "use_mark": "true"
                             }
                         }
                     }

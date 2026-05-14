@@ -75,7 +75,7 @@
         "action": "Custom",
         "custom_action": "AutoBattleUseMarkAct",
         "post_delay": 1000,
-        "attach": {"use_mark": true}
+        "attach": {"use_mark": false}
     },
     "Battle_Esc":{
         "recognition": "TemplateMatch",
