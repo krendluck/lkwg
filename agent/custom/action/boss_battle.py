@@ -270,54 +270,62 @@ class BossUseMarkAct(CustomAction):
         _update_image_size(ctrl)
         ic = get_controller()
 
-        if use_mark:
-            for attempt in range(2):
-                print(f"[BossBattle] >>> 点击印记图标 (尝试 {attempt + 1}/2)")
-                ic.click(*_MARK_ICON_POS)
-                time.sleep(0.5)
+        for attempt in range(2):
+            print(f"[BossBattle] >>> 点击印记图标 (尝试 {attempt + 1}/2)")
 
-                ctrl.post_screencap().wait()
-                image = ctrl.cached_image
-                if image is None:
-                    print("[BossBattle] 截图失败，跳过印记")
-                    ic.click_key(_VK_ESC)
-                    time.sleep(0.5)
-                    return True
-
-                bgr = np.asarray(image, dtype=np.uint8)
-                x, y, w, h = _MARK_COLOR_ROI
-                roi = bgr[y:y + h, x:x + w]
-                lower = np.all(roi >= _MARK_COLOR_LOWER, axis=2)
-                upper = np.all(roi <= _MARK_COLOR_UPPER, axis=2)
-                if np.any(lower & upper):
-                    print("[BossBattle] 印记颜色检测通过")
-                    break
-                print(f"[BossBattle] 印记颜色检测未通过 (尝试 {attempt + 1}/2)")
-            else:
-                print("[BossBattle] 印记颜色检测未通过，关闭界面")
+            ctrl.post_screencap().wait()
+            image = ctrl.cached_image
+            if image is None:
+                print("[BossBattle] 截图失败，跳过印记")
                 ic.click_key(_VK_ESC)
                 time.sleep(0.5)
                 return True
 
-            confirm_result = context.run_recognition(
-                "BossMarkConfirmDetect",
+            result = context.run_recognition(
+                "QieYueDetect",
                 image,
                 pipeline_override={
-                    "BossMarkConfirmDetect": {
-                        "recognition": "OCR",
-                        "roi": _MARK_CONFIRM_ROI,
-                        "expected": ["确认"],
+                    "QieYueDetect": {
+                        "recognition": "TemplateMatch",
+                        "template": "Battle/QieYue.png",
+                        "roi": [575, 307, 129, 112],
                     }
                 },
             )
-            if confirm_result is not None and confirm_result.hit:
-                box = confirm_result.box
-                if box:
-                    cx = box[0] + box[2] // 2
-                    cy = box[1] + box[3] // 2
-                    print(f"[BossBattle] >>> 点击确认 ({cx}, {cy})")
-                    ic.click(cx, cy)
-                    time.sleep(0.5)
+            if result is not None and result.hit:
+                print("[BossBattle] 检测到契约印记，进行确认")
+                break
+            else:
+                print("[BossBattle] 未检测到契约印记，退出")
+            # bgr = np.asarray(image, dtype=np.uint8)
+            # x, y, w, h = _MARK_COLOR_ROI
+            # roi = bgr[y:y + h, x:x + w]
+            # lower = np.all(roi >= _MARK_COLOR_LOWER, axis=2)
+            # upper = np.all(roi <= _MARK_COLOR_UPPER, axis=2)
+            # if np.any(lower & upper):
+            #     print("[BossBattle] 印记颜色检测通过")
+            #     break
+            # print(f"[BossBattle] 印记颜色检测未通过 (尝试 {attempt + 1}/2)")
+
+        confirm_result = context.run_recognition(
+            "BossMarkConfirmDetect",
+            image,
+            pipeline_override={
+                "BossMarkConfirmDetect": {
+                    "recognition": "OCR",
+                    "roi": _MARK_CONFIRM_ROI,
+                    "expected": ["确认"],
+                }
+            },
+        )
+        if confirm_result is not None and confirm_result.hit:
+            box = confirm_result.box
+            if box:
+                cx = box[0] + box[2] // 2
+                cy = box[1] + box[3] // 2
+                print(f"[BossBattle] >>> 点击确认 ({cx}, {cy})")
+                ic.click(cx, cy)
+                time.sleep(1)
 
         print("[BossBattle] >>> 按 ESC 退出奖励界面")
         ic.click_key(_VK_ESC)
